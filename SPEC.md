@@ -1,4 +1,4 @@
-# SPEC — Repo Dungeon (working title)
+# SPEC — gitcrawl
 
 Paste any public GitHub repo URL → it becomes a playable, good-looking dungeon in the browser. No install, no login. Built to be shared: every run ends with a screenshot-ready card.
 

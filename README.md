@@ -1,4 +1,4 @@
-# Repo Dungeon
+# gitcrawl
 
 Paste any public GitHub repo → play it as a dungeon in the browser.
 
