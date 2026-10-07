@@ -63,8 +63,9 @@ Dungeon is deterministic per commit SHA → same repo state = same dungeon (shar
 ## 5. Client (web)
 
 - Vite + TypeScript + Phaser 3 (tilemaps, arcade physics, camera, input all built in).
-- Style: clean top-down pixel-ish or 2.5D with smooth lighting/fog of war. Must look great in a 10s clip. Original art only.
-- Controls: WASD/arrows + mouse aim + click to attack; mobile: virtual joystick + tap attack.
+- **Locked decisions:** clean top-down pixel art · light action gameplay (walk, slash, beat the boss — no loot grind or hard difficulty) · desktop first, mobile playable but secondary.
+- Style: clean top-down pixel art (16×16 or 32×32 tiles), soft lighting and fog of war. Must look great in a 10s clip. Original art only (own sprites or properly licensed packs, e.g. CC0).
+- Controls (primary, desktop): WASD/arrows + mouse aim + click to attack. Mobile (secondary): virtual joystick + tap attack.
 - Player: one hero with 3 weapons to start (sword, bow, "refactor hammer" that one-shots goblins). Pick-ups from chests: damage boosts, speed, shield.
 - Combat: simple, juicy — hit flash, knockback, floating damage numbers, screen shake on boss hits.
 - Minimap in corner showing the folder structure.
