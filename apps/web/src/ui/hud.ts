@@ -5,6 +5,7 @@ import { bus, getDungeon } from '../game/host';
 import { WEAPONS, type RunStats, type WeaponId } from '../game/types';
 import { icons, weaponIcon } from './icons';
 import { audio } from '../audio/audio';
+import { EMBEDDED } from '../config';
 
 export interface HudCallbacks {
   onMenu: () => void;
@@ -72,7 +73,7 @@ export class Hud {
       h('span', { title: 'Rooms explored' }, 'Rooms ', this.rooms),
     );
     this.muteBtn = h('button', { class: 'icon-btn', title: 'Sound (M)', 'aria-label': 'Toggle sound', onclick: () => audio.toggleMute() }, '♪');
-    this.recBtn = h('button', { class: 'icon-btn', title: 'Record a 10 second clip', 'aria-label': 'Record clip', onclick: () => cb.onRecord() }, 'REC');
+    this.recBtn = h('button', { class: 'icon-btn', title: 'Record a 10 second clip', 'aria-label': 'Record clip', hidden: EMBEDDED, onclick: () => cb.onRecord() }, 'REC');
     const menuBtn = h('button', { class: 'icon-btn', title: 'Menu (Esc)', 'aria-label': 'Menu', onclick: () => cb.onMenu() }, '≡');
     const right = h('div', { class: 'hud-right' }, counters, h('div', { class: 'hud-buttons' }, this.recBtn, this.muteBtn, menuBtn));
 

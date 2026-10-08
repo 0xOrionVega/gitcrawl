@@ -5,7 +5,7 @@ import type { RunStats, WeaponId } from '../game/types';
 import { renderShareCard, canvasToBlob, verdictLine } from './sharecard';
 import { renderReport } from './report';
 import { toast } from './toast';
-import { SITE_URL } from '../config';
+import { SITE_URL, EMBEDDED } from '../config';
 import { clips } from '../record/clip';
 import { apiAvailable, getLeaderboard, submitRun, type LeaderEntry } from '../data/api';
 import { storage } from '../util/storage';
@@ -84,7 +84,7 @@ export function renderEnd(root: HTMLElement, fullSpec: DungeonSpec, stats: RunSt
     const shareLink = isPrivate ? SITE_URL : link;
     const xUrl = `https://x.com/intent/post?text=${encodeURIComponent(shareText(cardSpec, stats))}&url=${encodeURIComponent(shareLink)}`;
     shareRow.append(h('a', { class: 'btn primary', href: xUrl, target: '_blank', rel: 'noopener' }, 'Post on X'));
-    if (blob && navigator.canShare?.({ files: [new File([blob], fileName, { type: 'image/png' })] })) {
+    if (!EMBEDDED && blob && navigator.canShare?.({ files: [new File([blob], fileName, { type: 'image/png' })] })) {
       shareRow.append(
         h(
           'button',
@@ -102,7 +102,7 @@ export function renderEnd(root: HTMLElement, fullSpec: DungeonSpec, stats: RunSt
         ),
       );
     }
-    if (blob) shareRow.append(h('a', { class: 'btn', href: URL.createObjectURL(blob), download: fileName }, 'Download card'));
+    if (blob && !EMBEDDED) shareRow.append(h('a', { class: 'btn', href: URL.createObjectURL(blob), download: fileName }, 'Download card'));
     shareRow.append(
       h(
         'button',
@@ -113,7 +113,7 @@ export function renderEnd(root: HTMLElement, fullSpec: DungeonSpec, stats: RunSt
         'Copy link',
       ),
     );
-    if (clips.last) {
+    if (clips.last && !EMBEDDED) {
       shareRow.append(h('a', { class: 'btn', href: clips.last.url, download: `gitcrawl-${spec.repo.name}-boss.${clips.last.ext}` }, 'Download boss clip'));
     }
   });

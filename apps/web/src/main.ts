@@ -22,7 +22,7 @@ import { navigate, onRouteChange, parseRoute, playPath, type Route } from './ui/
 import { loadDungeon, loadFixture, loadFixtureIndex, loadLocalDungeon, LoadError } from './data/load';
 import { getDaily, getHall } from './data/api';
 import { clips, clipsSupported } from './record/clip';
-import { DEMO } from './config';
+import { DEMO, EMBEDDED } from './config';
 import type { RunStats } from './game/types';
 
 const app = $('#app');
@@ -130,12 +130,17 @@ async function fetchSpec(ref: RepoRef, title: string, priv = false): Promise<Dun
   try {
     return await loadDungeon(ref, loader.step, { priv });
   } catch (err) {
-    const message = err instanceof LoadError ? err.message : `Something went wrong: ${(err as Error).message}`;
+    let message = err instanceof LoadError ? err.message : `Something went wrong: ${(err as Error).message}`;
     const actions = [
       { label: 'Try again', run: () => void render(true) },
       { label: 'Back home', run: () => navigate('/') },
     ];
-    if (err instanceof LoadError && err.code === 'rate_limited') actions.splice(1, 0, { label: 'Play facebook/react', run: () => navigate('/r/facebook/react') });
+    if (DEMO && err instanceof LoadError && err.code === 'network') {
+      message = `This demo can't reach GitHub from here, so it can only open the dungeons it ships with. The full site builds any public repo.`;
+      actions.splice(0, 1, { label: 'Play facebook/react', run: () => navigate('/r/facebook/react') });
+    } else if (err instanceof LoadError && err.code === 'rate_limited') {
+      actions.splice(1, 0, { label: 'Play facebook/react', run: () => navigate('/r/facebook/react') });
+    }
     loader.fail(message, actions);
     return null;
   }
@@ -263,7 +268,7 @@ function openMenu() {
   if (!scene) return;
   setPaused(true);
   menuEl.hidden = false;
-  renderMenu(menuEl, { explore: scene.getMode() === 'explore', muted: audio.muted, canRecord: clipsSupported() }, {
+  renderMenu(menuEl, { explore: scene.getMode() === 'explore', muted: audio.muted, canRecord: clipsSupported() && !EMBEDDED }, {
     resume: () => {
       closeMenu();
       setPaused(false);
@@ -326,7 +331,7 @@ function wireBus() {
   });
   bus.on('toast', (p) => toast(p.text, p.tone));
   bus.on('boss', (p) => {
-    if (p.state === 'start' && clipsSupported()) clips.startRolling();
+    if (p.state === 'start' && clipsSupported() && !EMBEDDED) clips.startRolling();
   });
   bus.on('victory', (stats: RunStats) => {
     if (!run) return;

@@ -349,7 +349,7 @@ img.px {
 
 .hud-top {
   position: absolute;
-  top: 10px;
+  top: calc(10px + env(safe-area-inset-top, 0px));
   left: 10px;
   right: 10px;
   display: flex;
@@ -786,7 +786,7 @@ img.px {
 /* ---------------------------------------------------------------- touch */
 .touch {
   position: absolute;
-  inset: auto 0 0 0;
+  inset: auto 0 env(safe-area-inset-bottom, 0px) 0;
   height: 190px;
   z-index: 22;
   pointer-events: none;

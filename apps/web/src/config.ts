@@ -10,3 +10,12 @@ export const API_BASE: string | null = DEMO ? null : ((import.meta.env.VITE_API_
 export const SITE_URL: string = (import.meta.env.VITE_SITE_URL as string | undefined) ?? 'https://gitcrawl.dev';
 
 export const DEBUG = /[?&]debug=1/.test(location.search) || /[?&]debug=1/.test(location.hash);
+
+/** Running inside another page's frame (e.g. an embedded preview): no URL routing, no downloads. */
+export const EMBEDDED: boolean = (() => {
+  try {
+    return window.self !== window.top;
+  } catch {
+    return true;
+  }
+})();

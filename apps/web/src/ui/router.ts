@@ -1,6 +1,6 @@
 /** Path routing on the real site, hash routing in the static demo. */
 import { parseRepoInput, type RepoRef } from '@gitcrawl/shared';
-import { DEMO } from '../config';
+import { DEMO, EMBEDDED } from '../config';
 
 export type Route =
   | { name: 'home' }
@@ -12,13 +12,18 @@ export type Route =
   | { name: 'local' };
 
 const useHash = DEMO || location.protocol === 'file:';
+/** Embedded pages keep the route in memory: the host frame owns the URL. */
+const useMemory = EMBEDDED;
+let memoryPath = '/';
 
 function currentPath(): string {
+  if (useMemory) return memoryPath.split('?')[0] || '/';
   if (useHash) return location.hash.replace(/^#/, '').split('?')[0] || '/';
   return location.pathname;
 }
 
 function currentQuery(): URLSearchParams {
+  if (useMemory) return new URLSearchParams(memoryPath.split('?')[1] ?? '');
   if (useHash) return new URLSearchParams(location.hash.split('?')[1] ?? '');
   return new URLSearchParams(location.search);
 }
@@ -76,6 +81,11 @@ export function onRouteChange(fn: () => void) {
 }
 
 export function navigate(path: string, replace = false) {
+  if (useMemory) {
+    memoryPath = path;
+    listeners.forEach((fn) => fn());
+    return;
+  }
   if (useHash) {
     const next = `#${path}`;
     if (location.hash === next) {
@@ -92,5 +102,7 @@ export function navigate(path: string, replace = false) {
   listeners.forEach((fn) => fn());
 }
 
-window.addEventListener('popstate', () => listeners.forEach((fn) => fn()));
-if (useHash) window.addEventListener('hashchange', () => listeners.forEach((fn) => fn()));
+if (!useMemory) {
+  window.addEventListener('popstate', () => listeners.forEach((fn) => fn()));
+  if (useHash) window.addEventListener('hashchange', () => listeners.forEach((fn) => fn()));
+}

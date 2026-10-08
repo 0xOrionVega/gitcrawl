@@ -3,7 +3,7 @@ import { parseRepoInput, type RepoRef } from '@gitcrawl/shared';
 import { h, clear } from '../util/dom';
 import { loadFixtureIndex } from '../data/load';
 import { storage } from '../util/storage';
-import { DEMO } from '../config';
+import { DEMO, EMBEDDED } from '../config';
 import { getAuthStatus, getPrivateRepos } from '../data/api';
 
 export interface LandingActions {
@@ -70,7 +70,7 @@ export function renderLanding(root: HTMLElement, actions: LandingActions) {
   for (const r of recentRepos().slice(0, 3)) addChip(r, 'recent');
   void loadFixtureIndex().then((index) => {
     const names = DEMO ? index.map((e) => e.fullName) : FAMOUS;
-    for (const n of names.slice(0, 9)) addChip(n);
+    for (const n of names.slice(0, 12)) addChip(n);
   });
 
   const links = h(
@@ -94,9 +94,11 @@ export function renderLanding(root: HTMLElement, actions: LandingActions) {
       h(
         'p',
         { class: 'fineprint' },
-        DEMO
-          ? 'Demo build: the example dungeons are bundled; other repos are built in your browser from public GitHub data.'
-          : 'Reads public repository data from GitHub. Not affiliated with GitHub.',
+        DEMO && EMBEDDED
+          ? 'Preview build: these dungeons were built from the real repos and ship with the page. The full site opens any public repo.'
+          : DEMO
+            ? 'Demo build: the example dungeons are bundled; other repos are built in your browser from public GitHub data.'
+            : 'Reads public repository data from GitHub. Not affiliated with GitHub.',
       ),
     ),
   );
