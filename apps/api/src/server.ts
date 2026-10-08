@@ -201,7 +201,7 @@ export async function buildServer(cfg: Config, deps: ServerDeps = {}): Promise<F
       if (!q.code || !checkState(req.headers.cookie, q.state ?? '', appCfg)) return reply.code(400).send({ error: 'Login expired. Try connecting again.' });
       try {
         const session = await exchangeCode(appCfg, q.code, redirectUri, deps.fetchImpl ?? fetch);
-        return reply.header('set-cookie', sessionCookie(session, appCfg, secure)).redirect('/?connected=1');
+        return reply.header('set-cookie', sessionCookie(session, appCfg, secure)).redirect('/private');
       } catch (err) {
         return reply.code(502).send({ error: `GitHub login failed: ${(err as Error).message}` });
       }

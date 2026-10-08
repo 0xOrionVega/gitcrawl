@@ -11,7 +11,8 @@ import { Hud } from './ui/hud';
 import { Dialog } from './ui/dialog';
 import { mountToasts, toast } from './ui/toast';
 import { TouchControls } from './ui/touch';
-import { renderLanding, rememberRepo, renderLocalHelp } from './ui/landing';
+import { renderLanding, rememberRepo } from './ui/landing';
+import { renderPrivacy, renderPrivate } from './ui/private';
 import { renderLoading } from './ui/loading';
 import { renderMenu } from './ui/menu';
 import { renderEnd } from './ui/end';
@@ -108,6 +109,20 @@ async function render(force = false) {
     case 'guide':
       guidePage();
       break;
+    case 'private':
+      leaveRun();
+      document.title = 'Play private code | gitcrawl';
+      void startAttract();
+      showScreen('page');
+      renderPrivate(screen, { home: () => navigate('/'), privacy: () => navigate('/privacy'), play: (ref) => navigate(playPath(ref, { priv: true })) });
+      break;
+    case 'privacy':
+      leaveRun();
+      document.title = 'Is it safe? | gitcrawl';
+      void startAttract();
+      showScreen('page');
+      renderPrivacy(screen, { home: () => navigate('/'), back: () => navigate('/private') });
+      break;
     case 'daily':
       await dailyRaid();
       break;
@@ -123,10 +138,7 @@ const landingActions = {
   versus: () => navigate('/vs'),
   hall: () => navigate('/hall'),
   guide: () => navigate('/guide'),
-  local: () => {
-    showScreen('landing');
-    renderLocalHelp(screen, () => renderLanding(screen, landingActions), (ref: RepoRef) => navigate(playPath(ref, { priv: true })));
-  },
+  local: () => navigate('/private'),
 };
 
 async function fetchSpec(ref: RepoRef, title: string, priv = false): Promise<DungeonSpec | null> {
@@ -165,11 +177,12 @@ function beginRun(spec: DungeonSpec, ref: RepoRef, explore: boolean, daily: bool
     renderGuide(screen, { primary: `Enter ${spec.repo.fullName}`, onPrimary: () => beginRun(spec, ref, explore, daily) });
     return;
   }
-  rememberRepo(spec.repo.fullName);
+  // Private repo names stay out of local history and clip watermarks.
+  if (!spec.repo.private) rememberRepo(spec.repo.fullName);
   document.title = `${spec.repo.fullName}: ${spec.title.name} | gitcrawl`;
   run = { ref, spec, explore, daily, ended: false };
   showScreen(null);
-  clips.setLabel(spec.repo.fullName);
+  clips.setLabel(spec.repo.private ? 'a private repo' : spec.repo.fullName);
   hud.show(spec);
   if (isTouchDevice()) touch.show();
   startDungeon(spec, explore ? 'explore' : 'play');

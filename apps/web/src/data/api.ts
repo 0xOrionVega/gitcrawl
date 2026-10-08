@@ -55,7 +55,13 @@ export function getDaily() {
 }
 
 export function getAuthStatus() {
-  return get<{ enabled: boolean; user: { login: string; avatarUrl: string | null } | null }>('/auth/status', true);
+  return get<{ enabled: boolean; user: { login: string; avatarUrl: string | null } | null; installUrl?: string | null }>('/auth/status', true);
+}
+
+/** Revokes the GitHub token and clears the session cookie. */
+export async function logout(): Promise<void> {
+  if (API_BASE === null) return;
+  await fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include' }).catch(() => undefined);
 }
 
 export async function getPrivateRepos(): Promise<{ fullName: string; private: boolean }[] | null> {

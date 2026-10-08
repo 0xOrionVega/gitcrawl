@@ -39,15 +39,23 @@ The web client reads `VITE_API_BASE` (API origin if hosted separately) and `VITE
 
 ## Private repos with a GitHub App (optional)
 
-1. GitHub → Settings → Developer settings → GitHub Apps → New GitHub App.
-2. Callback URL: `https://YOUR_DOMAIN/auth/callback`. Enable "Request user authorization (OAuth) during installation".
-3. Repository permissions, all **read-only**: Contents, Metadata, Issues, Pull requests. No account permissions, no webhooks.
-4. Generate a client secret, then:
-   ```powershell
-   fly secrets set GITHUB_APP_CLIENT_ID=Iv1.xxx GITHUB_APP_CLIENT_SECRET=xxx GITHUB_APP_SLUG=your-app SESSION_SECRET=$(openssl rand -hex 32)
-   ```
+Without these settings the private page still works, but only offers the CLI.
 
-How data is handled: the user token lives only in an encrypted, HttpOnly cookie (AES-256-GCM, 8 hour max). Source code is read into memory to count lines and TODOs and is never written to disk. Private dungeons are cached in memory per user for one hour and never served to anyone else. Logging out revokes the token. Share cards for private repos hide the repo and file names.
+1. GitHub → Settings → Developer settings → GitHub Apps → **New GitHub App**.
+2. **Homepage URL**: `https://YOUR_DOMAIN`. **Callback URL**: `https://YOUR_DOMAIN/auth/callback`.
+3. Leave **Request user authorization (OAuth) during installation** off: logins must start from the site so the callback can check its `state`. Set **Setup URL** to `https://YOUR_DOMAIN/private` and tick **Redirect on update**, so people come back to their repo list after installing.
+4. **Webhook**: untick Active.
+5. Repository permissions, all **Read-only**: Contents, Metadata, Issues, Pull requests. No account permissions.
+6. **Where can this app be installed**: Any account.
+7. Create the app, then **Generate a new client secret**, and set:
+   ```powershell
+   fly secrets set GITHUB_APP_CLIENT_ID=Iv1.xxx GITHUB_APP_CLIENT_SECRET=xxx GITHUB_APP_SLUG=your-app-slug SESSION_SECRET=$(openssl rand -hex 32)
+   ```
+   The slug is the last part of the app's public URL, `github.com/apps/<slug>`.
+
+The flow: `/private` → Connect GitHub (OAuth login) → Choose repos on GitHub (installs the app) → back to `/private` with the repo list → play.
+
+How data is handled (also explained to visitors at `/privacy`): the user token lives only in an encrypted, HttpOnly cookie (AES-256-GCM, 8 hour max). Source code is read into memory to count lines and TODOs and is never written to disk. Private dungeons are cached in memory per user for one hour and never served to anyone else. Disconnecting revokes the token and drops the cache. Share cards and clips for private repos hide the repo and file names, and private runs never reach leaderboards.
 
 For code that should never touch any server, point people to the CLI: `npx gitcrawl-cli`.
 

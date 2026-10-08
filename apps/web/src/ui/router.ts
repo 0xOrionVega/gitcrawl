@@ -9,6 +9,8 @@ export type Route =
   | { name: 'vs'; a: RepoRef | null; b: RepoRef | null }
   | { name: 'hall' }
   | { name: 'guide' }
+  | { name: 'private' }
+  | { name: 'privacy' }
   | { name: 'daily' }
   | { name: 'local' };
 
@@ -34,7 +36,7 @@ export function parseRoute(): Route {
   const q = currentQuery();
   const parts = path.split('/').filter(Boolean);
   if (parts.length === 0) return { name: 'home' };
-  if (parts.length === 1 && parts[0] === 'guide') return { name: 'guide' };
+  if (parts.length === 1 && (parts[0] === 'guide' || parts[0] === 'private' || parts[0] === 'privacy')) return { name: parts[0] };
   const ref = (o?: string, r?: string) => (o && r ? parseRepoInput(`${o}/${r}`) : null);
   switch (parts[0]) {
     case 'r': {
