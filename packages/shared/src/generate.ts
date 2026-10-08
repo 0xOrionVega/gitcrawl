@@ -733,7 +733,11 @@ export function generateDungeon(snapshot: RepoSnapshot, _opts: GenerateOptions =
 
   // Guardians (NPCs).
   const npcPerRoom = new Map<number, number>();
-  for (const g of a.guardians.slice(0, G.maxNpcs)) {
+  const npcLogins = new Set<string>();
+  for (const g of a.guardians) {
+    if (npcLogins.size >= G.maxNpcs) break;
+    if (npcLogins.has(g.login.toLowerCase())) continue;
+    npcLogins.add(g.login.toLowerCase());
     let plan = g.folder === '' ? entrance : planByFolder.get(roomFolderFor(g.folder)) ?? entrance;
     if ((npcPerRoom.get(plan.id) ?? 0) >= 2) plan = entrance;
     if ((npcPerRoom.get(plan.id) ?? 0) >= 4) continue;
