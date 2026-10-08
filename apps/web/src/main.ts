@@ -18,6 +18,7 @@ import { renderEnd } from './ui/end';
 import { renderReport } from './ui/report';
 import { renderVersus, renderVersusForm } from './ui/versus';
 import { renderHall, hallFromFixtures } from './ui/hall';
+import { guideSeen, renderGuide } from './ui/guide';
 import { navigate, onRouteChange, parseRoute, playPath, type Route } from './ui/router';
 import { loadDungeon, loadFixture, loadFixtureIndex, loadLocalDungeon, LoadError } from './data/load';
 import { getDaily, getHall } from './data/api';
@@ -104,6 +105,9 @@ async function render(force = false) {
     case 'hall':
       await hallPage();
       break;
+    case 'guide':
+      guidePage();
+      break;
     case 'daily':
       await dailyRaid();
       break;
@@ -118,6 +122,7 @@ const landingActions = {
   daily: () => navigate('/daily'),
   versus: () => navigate('/vs'),
   hall: () => navigate('/hall'),
+  guide: () => navigate('/guide'),
   local: () => {
     showScreen('landing');
     renderLocalHelp(screen, () => renderLanding(screen, landingActions), (ref: RepoRef) => navigate(playPath(ref, { priv: true })));
@@ -154,6 +159,12 @@ async function play(ref: RepoRef, explore: boolean, daily: boolean, priv = false
 }
 
 function beginRun(spec: DungeonSpec, ref: RepoRef, explore: boolean, daily: boolean) {
+  // First run ever: show the field guide before entering.
+  if (!guideSeen()) {
+    showScreen('page');
+    renderGuide(screen, { primary: `Enter ${spec.repo.fullName}`, onPrimary: () => beginRun(spec, ref, explore, daily) });
+    return;
+  }
   rememberRepo(spec.repo.fullName);
   document.title = `${spec.repo.fullName}: ${spec.title.name} | gitcrawl`;
   run = { ref, spec, explore, daily, ended: false };
@@ -216,6 +227,14 @@ async function versusPage(route: Extract<Route, { name: 'vs' }>) {
   if (!b) return;
   showScreen('page');
   renderVersus(screen, a, b, actions);
+}
+
+function guidePage() {
+  leaveRun();
+  document.title = 'Field guide | gitcrawl';
+  void startAttract();
+  showScreen('page');
+  renderGuide(screen, { primary: 'Play a repo', onPrimary: () => navigate('/'), onHome: () => navigate('/') });
 }
 
 async function hallPage() {
@@ -281,6 +300,12 @@ function openMenu() {
       run.explore = next === 'explore';
       closeMenu();
       setPaused(false);
+    },
+    guide: () => {
+      closeMenu();
+      hud.root.hidden = true;
+      showScreen('page');
+      renderGuide(screen, { primary: 'Back to the dungeon', onPrimary: () => resumeFromPage() });
     },
     report: () => {
       closeMenu();

@@ -9,6 +9,7 @@ export interface MenuActions {
   restart: () => void;
   leave: () => void;
   map: () => void;
+  guide: () => void;
 }
 
 export function renderMenu(root: HTMLElement, state: { explore: boolean; muted: boolean; canRecord: boolean }, a: MenuActions) {
@@ -21,6 +22,7 @@ export function renderMenu(root: HTMLElement, state: { explore: boolean; muted: 
       h('button', { class: 'btn primary', onclick: a.resume }, 'Resume'),
       h('button', { class: 'btn', onclick: a.map }, 'Open the map'),
       h('button', { class: 'btn', onclick: a.toggleExplore }, state.explore ? 'Switch to fight mode' : 'Switch to explore mode'),
+      h('button', { class: 'btn', onclick: a.guide }, 'Field guide'),
       h('button', { class: 'btn', onclick: a.report }, 'Skip to the loot report'),
       state.canRecord ? h('button', { class: 'btn', onclick: a.record }, 'Record a 10 second clip') : null,
       h('button', { class: 'btn', onclick: a.restart }, 'Restart the run'),

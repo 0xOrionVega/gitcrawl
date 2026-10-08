@@ -11,6 +11,7 @@ export interface LandingActions {
   daily: () => void;
   versus: () => void;
   hall: () => void;
+  guide: () => void;
   local: () => void;
 }
 
@@ -76,6 +77,7 @@ export function renderLanding(root: HTMLElement, actions: LandingActions) {
   const links = h(
     'div',
     { class: 'landing-links' },
+    h('button', { type: 'button', onclick: actions.guide }, 'How it works'),
     h('button', { type: 'button', onclick: actions.daily }, 'Daily raid'),
     h('button', { type: 'button', onclick: actions.versus }, 'Versus: your repo against another'),
     h('button', { type: 'button', onclick: actions.hall }, 'Hall of Shame'),

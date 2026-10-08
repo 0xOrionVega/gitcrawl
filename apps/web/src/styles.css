@@ -1367,3 +1367,163 @@ img.px {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---------------------------------------------------------------- field guide */
+.guide .victory-sub {
+  max-width: 720px;
+  line-height: 1.35;
+}
+
+.guide-map-wrap {
+  padding: 10px;
+  overflow-x: auto;
+}
+
+.guide-map {
+  display: block;
+  width: 100%;
+  min-width: 560px;
+  height: auto;
+}
+
+.guide-map .gm-corridor {
+  stroke: var(--mortar);
+  stroke-width: 10;
+}
+
+.guide-map .gm-room {
+  fill: var(--stone-2);
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+
+.guide-map .gm-start {
+  stroke: var(--torch);
+}
+
+.guide-map .gm-boss {
+  fill: #2a0e18;
+  stroke: #ff4d6d;
+}
+
+.guide-map .gm-pit {
+  fill: #07050c;
+}
+
+.guide-map .gm-door {
+  fill: #9a6234;
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.guide-map .gm-icon {
+  image-rendering: pixelated;
+}
+
+.guide-map text {
+  text-anchor: middle;
+  fill: var(--parchment);
+}
+
+.guide-map .gm-title {
+  font-family: var(--display);
+  font-size: 9px;
+  fill: var(--torch);
+}
+
+.guide-map .gm-sub {
+  font-family: var(--body);
+  font-size: 12px;
+}
+
+.guide-map .gm-door-label {
+  font-size: 10px;
+  fill: var(--parchment-dim);
+}
+
+.guide-map .gm-note {
+  text-anchor: start;
+  font-family: var(--body);
+  font-size: 13px;
+  fill: var(--parchment-dim);
+}
+
+.guide-entries {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.guide-entry {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px;
+}
+
+.guide-entry h3 {
+  margin: 0 0 4px;
+  font-family: var(--display);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.6;
+  white-space: pre;
+}
+
+.guide-entry p {
+  margin: 0 0 4px;
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.guide-entry .guide-repo {
+  color: var(--torch);
+}
+
+.guide-icon {
+  flex: 0 0 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  background: var(--stone-0);
+  border: 2px solid var(--ink);
+}
+
+.guide-icon img {
+  max-width: 48px;
+  max-height: 48px;
+  min-width: 32px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.guide-keys {
+  list-style: none;
+  margin: 0;
+  padding: 12px 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 8px 20px;
+}
+
+.guide-keys li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+}
+
+.guide-keys kbd {
+  font-family: var(--display);
+  font-size: 9px;
+  padding: 4px 6px;
+  background: var(--stone-3);
+  border: 2px solid var(--ink);
+  white-space: nowrap;
+}
+
+.guide-cta {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 40px;
+}

@@ -73,3 +73,10 @@ export function setPaused(paused: boolean) {
     game.scene.resume('dungeon');
   }
 }
+
+/** A loaded game texture as a data URL (first frame of a sheet), for DOM pages like the guide. */
+export function textureUrl(key: string): string {
+  const tex = game?.textures.exists(key) ? game.textures.get(key) : null;
+  if (!tex) return '';
+  return game!.textures.getBase64(key, tex.has('0') ? '0' : undefined);
+}
