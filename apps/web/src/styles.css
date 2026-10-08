@@ -1212,8 +1212,8 @@ img.px {
 
 .hall-list li {
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  gap: 2px;
   padding: 10px 14px;
   border-bottom: 2px solid var(--stone-2);
 }
@@ -1232,8 +1232,8 @@ img.px {
 
 .hall-cols {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 6px 22px;
 }
 
 /* ---------------------------------------------------------------- big map */

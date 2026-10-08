@@ -3,6 +3,7 @@ import { formatNumber, parseRepoInput, type RepoRef } from '@gitcrawl/shared';
 import { h, clear } from '../util/dom';
 import type { HallData, HallEntry } from '../data/api';
 import type { FixtureIndexEntry } from '../data/load';
+import { DEMO } from '../config';
 
 export function hallFromFixtures(index: FixtureIndexEntry[]): HallData {
   const top = (list: FixtureIndexEntry[], value: (e: FixtureIndexEntry) => number, label: (e: FixtureIndexEntry) => string, desc = true): HallEntry[] =>
@@ -39,7 +40,13 @@ export function renderHall(root: HTMLElement, data: HallData, play: (ref: RepoRe
       { class: 'page-inner' },
       h('div', { class: 'topbar' }, h('button', { class: 'home', onclick: home }, 'gitcrawl')),
       h('h1', { class: 'victory-title' }, 'Hall of Shame'),
-      h('p', { class: 'victory-sub' }, 'Every dungeon anyone has entered, ranked by the things maintainers would rather not talk about.'),
+      h(
+        'p',
+        { class: 'victory-sub' },
+        DEMO
+          ? 'The dungeons in this demo, ranked by the things maintainers would rather not talk about.'
+          : 'Every dungeon anyone has entered, ranked by the things maintainers would rather not talk about.',
+      ),
       h(
         'div',
         { class: 'hall-cols' },

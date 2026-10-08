@@ -1,0 +1,25 @@
+{
+  "name": "@gitcrawl/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js",
+    "build": "tsup",
+    "pregen": "tsx src/pregen.ts",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@fastify/cors": "11.3.0",
+    "@fastify/static": "10.1.5",
+    "@resvg/resvg-js": "2.6.2",
+    "fastify": "5.12.5"
+  },
+  "devDependencies": {
+    "@expo-google-fonts/pixelify-sans": "0.4.2",
+    "@expo-google-fonts/press-start-2p": "0.4.1",
+    "@gitcrawl/shared": "workspace:*",
+    "tsup": "8.5.1"
+  }
+}
