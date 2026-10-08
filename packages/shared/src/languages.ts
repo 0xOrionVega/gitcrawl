@@ -139,10 +139,11 @@ const GENERATED_SEGMENTS = new Set([
   'node_modules', 'vendor', 'third_party', 'third-party', 'thirdparty', 'bower_components', 'Pods', '.yarn',
   'dist', 'build', 'out', 'target', '.next', '.nuxt', '.svelte-kit', 'coverage', '__snapshots__',
   'fixtures', '__fixtures__', 'testdata', 'test-data', 'generated', '__generated__', 'gen', '.git',
+  'asic_reg', 'autogen', 'auto-generated', '.generated',
 ]);
 
 const GENERATED_NAME_RE =
-  /(\.min\.(js|css)|\.bundle\.js|\.map|\.pb\.go|_pb2\.py|_pb2_grpc\.py|\.pb\.(cc|h)|\.generated\.[a-z]+|\.g\.dart|\.freezed\.dart|\.designer\.cs|\.snap|\.d\.ts)$/i;
+  /(\.min\.(js|css|mjs)|[.-]bundle\.js|\.map|\.pb\.go|\.pb\.gw\.go|_pb2\.py|_pb2_grpc\.py|\.pb\.(cc|h)|[._-]generated\.[a-z]+|\.gen\.(go|ts|js|rs)|zz_generated[^/]*|bindata\.go|\.g\.dart|\.freezed\.dart|\.designer\.cs|\.snap|\.d\.ts|_sh_mask\.h|_offset\.h|_default\.h)$/i;
 
 export const LOCKFILES = new Set([
   'package-lock.json', 'npm-shrinkwrap.json', 'yarn.lock', 'pnpm-lock.yaml', 'bun.lock', 'bun.lockb', 'Cargo.lock',
@@ -181,7 +182,7 @@ const TEST_SEGMENTS = new Set([
 ]);
 
 const TEST_NAME_RE =
-  /(\.(test|spec|e2e|cy)\.[a-z]+$|_test\.(go|py|rb|exs|dart|cc|cpp|c)$|^test_.*\.py$|Tests?\.(java|kt|swift|cs|scala|php)$|_spec\.rb$|\.t$)/;
+  /(\.(test|spec|e2e|cy)\.[a-z]+$|[-_]tests?\.[a-z0-9]+$|^tests?\.[a-z0-9]+$|^test_.*\.[a-z]+$|Tests?\.(java|kt|swift|cs|scala|php)$|_spec\.rb$|\.t$)/;
 
 export function isTestPath(path: string): boolean {
   const segs = segmentsOf(path);

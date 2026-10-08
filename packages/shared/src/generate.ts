@@ -740,13 +740,14 @@ export function generateDungeon(snapshot: RepoSnapshot, _opts: GenerateOptions =
     const s = plan === entrance ? spot(plan, { margin: 2 }) : spot(plan, { margin: 1, awayFromSpawn: 3 });
     if (!s) continue;
     npcPerRoom.set(plan.id, (npcPerRoom.get(plan.id) ?? 0) + 1);
+    const handle = /\s/.test(g.login) ? null : g.login;
     add({
       kind: 'npc',
       ...s,
       room: plan.id,
-      label: `@${g.login}`,
+      label: handle ? `@${handle}` : g.login,
       text: g.lastMessage ?? undefined,
-      url: `https://github.com/${encodeURIComponent(g.login)}`,
+      url: handle && snapshot.source !== 'local' ? `https://github.com/${encodeURIComponent(handle)}` : null,
       meta: {
         login: g.login,
         avatar: g.avatarUrl,

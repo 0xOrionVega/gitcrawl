@@ -1,0 +1,27 @@
+{
+  "name": "gitcrawl-cli",
+  "version": "0.1.0",
+  "description": "Play any git repo on your machine as a dungeon. Your code never leaves your computer.",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "gitcrawl": "./dist/main.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup && node scripts/copy-web.mjs",
+    "typecheck": "tsc -p tsconfig.json",
+    "start": "tsx src/main.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@gitcrawl/shared": "workspace:*",
+    "tsup": "8.5.1"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": ["git", "dungeon", "game", "code-health", "todo"]
+}

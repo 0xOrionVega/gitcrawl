@@ -1,0 +1,155 @@
+{
+  "generatedAt": "2026-10-08T03:02:00.788Z",
+  "repos": [
+    {
+      "fullName": "bitcoin/bitcoin",
+      "file": "bitcoin__bitcoin.json",
+      "title": "Lair of the Colossus",
+      "theme": "azure",
+      "files": 3052,
+      "todos": 47,
+      "boss": {
+        "name": "net_processing.cpp",
+        "loc": 6581
+      },
+      "health": 90,
+      "grade": "A",
+      "language": "TypeScript"
+    },
+    {
+      "fullName": "BurntSushi/ripgrep",
+      "file": "BurntSushi__ripgrep.json",
+      "title": "Lair of the Colossus",
+      "theme": "rust",
+      "files": 237,
+      "todos": 13,
+      "boss": {
+        "name": "defs.rs",
+        "loc": 8161
+      },
+      "health": 85,
+      "grade": "A",
+      "language": "Rust"
+    },
+    {
+      "fullName": "facebook/react",
+      "file": "facebook__react.json",
+      "title": "Goblin Infestation",
+      "theme": "sun",
+      "files": 7252,
+      "todos": 813,
+      "boss": {
+        "name": "renderer.js",
+        "loc": 8082
+      },
+      "health": 75,
+      "grade": "B",
+      "language": "JavaScript"
+    },
+    {
+      "fullName": "junegunn/fzf",
+      "file": "junegunn__fzf.json",
+      "title": "Lair of the Colossus",
+      "theme": "ice",
+      "files": 161,
+      "todos": 23,
+      "boss": {
+        "name": "terminal.go",
+        "loc": 8850
+      },
+      "health": 85,
+      "grade": "A",
+      "language": "Go"
+    },
+    {
+      "fullName": "kelseyhightower/nocode",
+      "file": "kelseyhightower__nocode.json",
+      "title": "Abandoned Crypt",
+      "theme": "stone",
+      "files": 5,
+      "todos": 0,
+      "boss": {
+        "name": "Dockerfile",
+        "loc": 1
+      },
+      "health": 65,
+      "grade": "C",
+      "language": "Markdown"
+    },
+    {
+      "fullName": "ohmyzsh/ohmyzsh",
+      "file": "ohmyzsh__ohmyzsh.json",
+      "title": "Monorepo Megadungeon",
+      "theme": "sand",
+      "files": 1174,
+      "todos": 21,
+      "boss": {
+        "name": "git-completion.bash",
+        "loc": 3562
+      },
+      "health": 95,
+      "grade": "S",
+      "language": "Shell"
+    },
+    {
+      "fullName": "pallets/flask",
+      "file": "pallets__flask.json",
+      "title": "Pristine Sanctum",
+      "theme": "jungle",
+      "files": 236,
+      "todos": 0,
+      "boss": {
+        "name": "app.py",
+        "loc": 1625
+      },
+      "health": 100,
+      "grade": "S",
+      "language": "Python"
+    },
+    {
+      "fullName": "rails/rails",
+      "file": "rails__rails.json",
+      "title": "Legacy Labyrinth",
+      "theme": "crimson",
+      "files": 5003,
+      "todos": 27,
+      "boss": {
+        "name": "form_helper.rb",
+        "loc": 2767
+      },
+      "health": 75,
+      "grade": "B",
+      "language": "Ruby"
+    },
+    {
+      "fullName": "torvalds/linux",
+      "file": "torvalds__linux.json",
+      "title": "Endless Megadungeon",
+      "theme": "iron",
+      "files": 96052,
+      "todos": 108,
+      "boss": {
+        "name": "phy_n.c",
+        "loc": 33466
+      },
+      "health": 75,
+      "grade": "B",
+      "language": "C"
+    },
+    {
+      "fullName": "vuejs/core",
+      "file": "vuejs__core.json",
+      "title": "Monorepo Megadungeon",
+      "theme": "azure",
+      "files": 702,
+      "todos": 25,
+      "boss": {
+        "name": "renderer.ts",
+        "loc": 2670
+      },
+      "health": 90,
+      "grade": "A",
+      "language": "TypeScript"
+    }
+  ]
+}

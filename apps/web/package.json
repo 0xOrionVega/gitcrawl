@@ -1,0 +1,22 @@
+{
+  "name": "@gitcrawl/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:demo": "vite build --mode demo",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@fontsource/pixelify-sans": "5.3.0",
+    "@fontsource/press-start-2p": "5.3.0",
+    "@gitcrawl/shared": "workspace:*",
+    "phaser": "3.90.0"
+  },
+  "devDependencies": {
+    "vite": "7.3.7"
+  }
+}

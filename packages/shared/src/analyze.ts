@@ -111,7 +111,7 @@ export function analyzeSnapshot(snapshot: RepoSnapshot): Analysis {
     const def = languageOf(entry.path);
     const binary = isBinaryPath(entry.path);
     const scanned = scannedByPath.get(entry.path);
-    const generated = isGeneratedPath(entry.path, entry.size);
+    const generated = isGeneratedPath(entry.path, entry.size) || !!scanned?.generated;
     const lockfile = isLockfile(entry.path);
     let loc = 0;
     let exact = false;
@@ -209,7 +209,7 @@ export function analyzeSnapshot(snapshot: RepoSnapshot): Analysis {
   let scannedLoc = 0;
   for (const s of snapshot.scanned) {
     const info = fileByPath.get(s.path);
-    if (info && (info.generated || info.pit)) continue;
+    if (s.generated || (info && (info.generated || info.pit))) continue;
     todoScannedFiles++;
     scannedLoc += s.lines;
     todos.push(...s.todos);
@@ -465,14 +465,15 @@ function findGuardians(snapshot: RepoSnapshot, folders: Map<string, FolderInfo>)
     let m = byFolder.get(c.folder);
     if (!m) byFolder.set(c.folder, (m = new Map()));
     const cur = m.get(c.author);
+    const weight = c.count ?? 1;
     if (cur) {
-      cur.n++;
+      cur.n += weight;
       if (c.date && (!cur.date || c.date > cur.date)) {
         cur.msg = c.message;
         cur.date = c.date;
       }
     } else {
-      m.set(c.author, { n: 1, msg: c.message, date: c.date, avatar: c.avatarUrl });
+      m.set(c.author, { n: weight, msg: c.message, date: c.date, avatar: c.avatarUrl });
     }
   }
   for (const [folder, authors] of byFolder) {

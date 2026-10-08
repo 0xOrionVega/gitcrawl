@@ -112,14 +112,57 @@ export function countLines(content: string): number {
   return n;
 }
 
+const GENERATED_MARKER =
+  /(@generated\b|do not edit|auto-?generated|automatically generated|this file (is|was|has been) (auto-?)?generated|machine generated|code generated .{0,80}do not edit)/i;
+/** Weaker phrasing only counts in the file header. */
+const HEADER_GENERATED = /\b(generated|created) (by|from|with|using) \S+/i;
+const BUNDLE_MARKER = /(__webpack_require__|webpackBootstrap|\bdefine\.amd\b|\(function\s*\(\s*(global|root)\s*,\s*factory\s*\)|\bSystem\.register\(|parcelRequire)/;
+
+/**
+ * Content-based check for generated, bundled, minified or pure-data files.
+ * These make terrible bosses (nobody wrote 40,000 lines of #defines by hand).
+ */
+export function detectGenerated(content: string, lines = countLines(content)): boolean {
+  const head = content.slice(0, 4000);
+  if (GENERATED_MARKER.test(head)) return true;
+  if (HEADER_GENERATED.test(content.slice(0, 300)) && /generat/i.test(content.slice(0, 300))) return true;
+  if (/sourceMappingURL=/.test(content.slice(-600))) return true;
+  if (/^\s*\/\*!/.test(head) && BUNDLE_MARKER.test(content.slice(0, 200_000))) return true;
+  if (BUNDLE_MARKER.test(head)) return true;
+  if (lines > 0 && content.length / lines > 220) return true; // minified
+  if (lines > 1200) {
+    const all = content.split(/\r?\n/);
+    const step = Math.max(1, Math.floor(all.length / 400));
+    let sampled = 0;
+    let dataLike = 0;
+    for (let i = 0; i < all.length; i += step) {
+      const line = all[i].trim();
+      if (!line) continue;
+      sampled++;
+      if (
+        /^#\s*define\s+\w+\s+\(?(0x[0-9a-f]+|\d+)[ul]*\)?$/i.test(line) ||
+        /^[\s\d,.\-+x{}a-f()_|<>]+,?$/i.test(line) ||
+        /^["'`][^"'`]*["'`]\s*[,:;]?\s*(["'`][^"'`]*["'`]\s*,?)?$/.test(line) ||
+        /^(\{\s*)?0x[0-9a-f]+\s*,/i.test(line)
+      ) {
+        dataLike++;
+      }
+    }
+    if (sampled > 50 && dataLike / sampled > 0.6) return true;
+  }
+  return false;
+}
+
 /** Turn raw file content into a ScannedFile. */
 export function scanContent(path: string, content: string, opts: { taunts?: boolean } = {}): ScannedFile {
+  const lines = countLines(content);
   const file: ScannedFile = {
     path,
-    lines: countLines(content),
+    lines,
     todos: extractTodos(path, content),
   };
-  if (opts.taunts) file.comments = extractTaunts(content);
+  if (detectGenerated(content, lines)) file.generated = true;
+  if (opts.taunts && !file.generated) file.comments = extractTaunts(content);
   return file;
 }
 

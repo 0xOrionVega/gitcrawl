@@ -36,6 +36,8 @@ export interface ScannedFile {
   todos: TodoItem[];
   /** Candidate taunt lines (cleaned comment text). Only kept for big files. */
   comments?: string[];
+  /** Content looks generated, bundled or minified (excluded from bosses and TODO stats). */
+  generated?: boolean;
 }
 
 export interface Contributor {
@@ -52,6 +54,8 @@ export interface FolderCommit {
   avatarUrl: string | null;
   message: string;
   date: string | null;
+  /** Number of commits this entry stands for (pre-aggregated samples). Defaults to 1. */
+  count?: number;
 }
 
 export interface BranchInfo {
