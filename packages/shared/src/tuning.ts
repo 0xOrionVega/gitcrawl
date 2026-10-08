@@ -4,8 +4,10 @@
  */
 export const TUNING = {
   generator: {
-    cellW: 26,
-    cellH: 20,
+    /** Each grid column/row is (biggest room in it) + cellPad tiles, at least cellMin. */
+    cellPad: 7,
+    cellMinW: 16,
+    cellMinH: 14,
     maxFolderRooms: 28,
     entrance: { w: 14, h: 10 },
     boss: { w: 20, h: 14 },
