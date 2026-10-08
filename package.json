@@ -1,0 +1,26 @@
+{
+  "name": "gitcrawl",
+  "private": true,
+  "type": "module",
+  "description": "Paste any GitHub repo, play it as a dungeon.",
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter @gitcrawl/api --filter @gitcrawl/web dev",
+    "build": "pnpm --filter @gitcrawl/web build && pnpm --filter @gitcrawl/api build && pnpm --filter gitcrawl-cli build",
+    "start": "pnpm --filter @gitcrawl/api start",
+    "test": "vitest run",
+    "typecheck": "pnpm -r typecheck",
+    "pregen": "pnpm --filter @gitcrawl/api pregen",
+    "fixtures": "tsx scripts/make-fixtures.ts",
+    "demo": "pnpm --filter @gitcrawl/web build:demo"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
+  },
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22"
+  }
+}

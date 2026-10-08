@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.cache/
+*.log
+.env
+.env.*
+!.env.example
+coverage/
+.DS_Store
+apps/web/public/fixtures/
