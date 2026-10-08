@@ -49,21 +49,15 @@ export function stopDungeon() {
   if (game.scene.isActive('dungeon') || game.scene.isPaused('dungeon')) game.scene.stop('dungeon');
 }
 
+/** The dungeon scene while it is running or paused (the pause menu acts on it). */
 export function getDungeon(): DungeonScene | null {
-  if (!game) return null;
-  const scene = game.scene.getScene('dungeon') as DungeonScene | null;
-  return scene && scene.scene.isActive() ? scene : null;
-}
-
-/** The dungeon scene while it is running or paused (getDungeon skips paused scenes). */
-function getDungeonAny(): DungeonScene | null {
   if (!game) return null;
   if (!game.scene.isActive('dungeon') && !game.scene.isPaused('dungeon')) return null;
   return game.scene.getScene('dungeon') as DungeonScene | null;
 }
 
 export function setDialogOpen(open: boolean) {
-  getDungeonAny()?.setDialogOpen(open);
+  getDungeon()?.setDialogOpen(open);
 }
 
 export function getCanvas(): HTMLCanvasElement | null {

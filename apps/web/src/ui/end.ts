@@ -5,7 +5,7 @@ import type { RunStats, WeaponId } from '../game/types';
 import { renderShareCard, canvasToBlob, verdictLine } from './sharecard';
 import { renderReport } from './report';
 import { toast } from './toast';
-import { SITE_URL, EMBEDDED } from '../config';
+import { SITE_URL, EMBEDDED, OWNER_X } from '../config';
 import { clips } from '../record/clip';
 import { apiAvailable, getLeaderboard, submitRun, type LeaderEntry } from '../data/api';
 import { storage } from '../util/storage';
@@ -82,7 +82,7 @@ export function renderEnd(root: HTMLElement, fullSpec: DungeonSpec, stats: RunSt
     const blob = await canvasToBlob(canvas);
     const fileName = `gitcrawl-${spec.repo.owner}-${spec.repo.name}.png`;
     const shareLink = isPrivate ? SITE_URL : link;
-    const xUrl = `https://x.com/intent/post?text=${encodeURIComponent(shareText(cardSpec, stats))}&url=${encodeURIComponent(shareLink)}`;
+    const xUrl = `https://x.com/intent/post?text=${encodeURIComponent(shareText(cardSpec, stats))}&url=${encodeURIComponent(shareLink)}&via=${OWNER_X}`;
     shareRow.append(h('a', { class: 'btn primary', href: xUrl, target: '_blank', rel: 'noopener' }, 'Post on X'));
     if (!EMBEDDED && blob && navigator.canShare?.({ files: [new File([blob], fileName, { type: 'image/png' })] })) {
       shareRow.append(

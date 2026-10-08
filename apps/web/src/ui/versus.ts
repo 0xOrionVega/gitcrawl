@@ -2,7 +2,7 @@
 import { formatNumber, parseRepoInput, type DungeonSpec, type RepoRef } from '@gitcrawl/shared';
 import { h, clear, copyText } from '../util/dom';
 import { toast } from './toast';
-import { SITE_URL } from '../config';
+import { SITE_URL, OWNER_X } from '../config';
 
 export interface VersusActions {
   compare: (a: RepoRef, b: RepoRef) => void;
@@ -130,7 +130,7 @@ export function renderVersus(root: HTMLElement, a: DungeonSpec, b: DungeonSpec, 
           'a',
           {
             class: 'btn primary',
-            href: `https://x.com/intent/post?text=${encodeURIComponent(`${versusVerdicts(a, b)[0] ?? ''} Settled it on gitcrawl.`)}&url=${encodeURIComponent(link)}`,
+            href: `https://x.com/intent/post?text=${encodeURIComponent(`${versusVerdicts(a, b)[0] ?? ''} Settled it on gitcrawl.`)}&url=${encodeURIComponent(link)}&via=${OWNER_X}`,
             target: '_blank',
             rel: 'noopener',
           },

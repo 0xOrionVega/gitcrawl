@@ -3,7 +3,7 @@ import { parseRepoInput, type RepoRef } from '@gitcrawl/shared';
 import { h, clear } from '../util/dom';
 import { loadFixtureIndex } from '../data/load';
 import { storage } from '../util/storage';
-import { DEMO, EMBEDDED } from '../config';
+import { DEMO, EMBEDDED, OWNER_X } from '../config';
 import { getAuthStatus, getPrivateRepos } from '../data/api';
 
 export interface LandingActions {
@@ -100,6 +100,7 @@ export function renderLanding(root: HTMLElement, actions: LandingActions) {
             ? 'Demo build: the example dungeons are bundled; other repos are built in your browser from public GitHub data.'
             : 'Reads public repository data from GitHub. Not affiliated with GitHub.',
       ),
+      h('p', { class: 'fineprint owner' }, 'Made by ', h('a', { href: `https://x.com/${OWNER_X}`, target: '_blank', rel: 'noopener' }, `@${OWNER_X}`)),
     ),
   );
   if (window.matchMedia('(pointer: fine)').matches) window.setTimeout(() => input.focus(), 50);
