@@ -4,7 +4,7 @@ import { DEMO } from '../config';
 
 export type Route =
   | { name: 'home' }
-  | { name: 'play'; ref: RepoRef; explore: boolean; daily: boolean }
+  | { name: 'play'; ref: RepoRef; explore: boolean; daily: boolean; priv: boolean }
   | { name: 'report'; ref: RepoRef }
   | { name: 'vs'; a: RepoRef | null; b: RepoRef | null }
   | { name: 'hall' }
@@ -32,7 +32,9 @@ export function parseRoute(): Route {
   switch (parts[0]) {
     case 'r': {
       const r = ref(parts[1], parts[2]);
-      return r ? { name: 'play', ref: r, explore: q.get('mode') === 'explore', daily: q.get('daily') === '1' } : { name: 'home' };
+      return r
+        ? { name: 'play', ref: r, explore: q.get('mode') === 'explore', daily: q.get('daily') === '1', priv: q.get('private') === '1' }
+        : { name: 'home' };
     }
     case 'report': {
       const r = ref(parts[1], parts[2]);
@@ -49,7 +51,7 @@ export function parseRoute(): Route {
     default: {
       // gitcrawl.dev/facebook/react also works.
       const r = ref(parts[0], parts[1]);
-      return r ? { name: 'play', ref: r, explore: false, daily: false } : { name: 'home' };
+      return r ? { name: 'play', ref: r, explore: false, daily: false, priv: false } : { name: 'home' };
     }
   }
 }
@@ -58,10 +60,11 @@ export function href(path: string): string {
   return useHash ? `#${path}` : path;
 }
 
-export function playPath(ref: RepoRef, opts: { explore?: boolean; daily?: boolean } = {}): string {
+export function playPath(ref: RepoRef, opts: { explore?: boolean; daily?: boolean; priv?: boolean } = {}): string {
   const q = new URLSearchParams();
   if (opts.explore) q.set('mode', 'explore');
   if (opts.daily) q.set('daily', '1');
+  if (opts.priv) q.set('private', '1');
   const qs = q.toString();
   return `/r/${ref.owner}/${ref.name}${qs ? `?${qs}` : ''}`;
 }

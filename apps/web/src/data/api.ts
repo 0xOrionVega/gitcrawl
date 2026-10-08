@@ -31,10 +31,10 @@ export interface DailyData {
 
 export const apiAvailable = () => API_BASE !== null;
 
-async function get<T>(path: string): Promise<T | null> {
+async function get<T>(path: string, withCookies = false): Promise<T | null> {
   if (API_BASE === null) return null;
   try {
-    const res = await fetch(`${API_BASE}${path}`);
+    const res = await fetch(`${API_BASE}${path}`, withCookies ? { credentials: 'include' } : {});
     if (!res.ok) return null;
     return (await res.json()) as T;
   } catch {
@@ -55,7 +55,18 @@ export function getDaily() {
 }
 
 export function getAuthStatus() {
-  return get<{ enabled: boolean; user: { login: string; avatarUrl: string | null } | null }>('/auth/status');
+  return get<{ enabled: boolean; user: { login: string; avatarUrl: string | null } | null }>('/auth/status', true);
+}
+
+export async function getPrivateRepos(): Promise<{ fullName: string; private: boolean }[] | null> {
+  if (API_BASE === null) return null;
+  try {
+    const res = await fetch(`${API_BASE}/api/private/repos`, { credentials: 'include' });
+    if (!res.ok) return null;
+    return ((await res.json()) as { repos: { fullName: string; private: boolean }[] }).repos;
+  } catch {
+    return null;
+  }
 }
 
 export async function submitRun(

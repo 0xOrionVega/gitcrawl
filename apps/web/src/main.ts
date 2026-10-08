@@ -93,7 +93,7 @@ async function render(force = false) {
       void startAttract();
       break;
     case 'play':
-      await play(route.ref, route.explore, route.daily);
+      await play(route.ref, route.explore, route.daily, route.priv);
       break;
     case 'report':
       await reportPage(route.ref);
@@ -120,15 +120,15 @@ const landingActions = {
   hall: () => navigate('/hall'),
   local: () => {
     showScreen('landing');
-    renderLocalHelp(screen, () => renderLanding(screen, landingActions));
+    renderLocalHelp(screen, () => renderLanding(screen, landingActions), (ref: RepoRef) => navigate(playPath(ref, { priv: true })));
   },
 };
 
-async function fetchSpec(ref: RepoRef, title: string): Promise<DungeonSpec | null> {
+async function fetchSpec(ref: RepoRef, title: string, priv = false): Promise<DungeonSpec | null> {
   showScreen('loading');
   const loader = renderLoading(screen, title);
   try {
-    return await loadDungeon(ref, loader.step);
+    return await loadDungeon(ref, loader.step, { priv });
   } catch (err) {
     const message = err instanceof LoadError ? err.message : `Something went wrong: ${(err as Error).message}`;
     const actions = [
@@ -141,9 +141,9 @@ async function fetchSpec(ref: RepoRef, title: string): Promise<DungeonSpec | nul
   }
 }
 
-async function play(ref: RepoRef, explore: boolean, daily: boolean) {
+async function play(ref: RepoRef, explore: boolean, daily: boolean, priv = false) {
   leaveRun();
-  const spec = await fetchSpec(ref, `${ref.owner}/${ref.name}`);
+  const spec = await fetchSpec(ref, `${ref.owner}/${ref.name}`, priv);
   if (!spec) return;
   beginRun(spec, ref, explore, daily);
 }

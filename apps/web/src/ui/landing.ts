@@ -4,6 +4,7 @@ import { h, clear } from '../util/dom';
 import { loadFixtureIndex } from '../data/load';
 import { storage } from '../util/storage';
 import { DEMO } from '../config';
+import { getAuthStatus, getPrivateRepos } from '../data/api';
 
 export interface LandingActions {
   play: (ref: RepoRef) => void;
@@ -102,16 +103,47 @@ export function renderLanding(root: HTMLElement, actions: LandingActions) {
   if (window.matchMedia('(pointer: fine)').matches) window.setTimeout(() => input.focus(), 50);
 }
 
-export function renderLocalHelp(root: HTMLElement, back: () => void) {
+export function renderLocalHelp(root: HTMLElement, back: () => void, playPrivate: (ref: RepoRef) => void) {
   clear(root);
+  const connect = h('div', { class: 'section', style: 'text-align:left' });
   root.append(
     h(
       'div',
       { class: 'landing-inner' },
       h('h1', { class: 'logo', style: 'font-size:28px' }, 'Play private code'),
       h('p', { class: 'pitch' }, 'Run the CLI inside any git repo. It builds the dungeon on your machine and opens it in your browser. Nothing is uploaded.'),
-      h('div', { class: 'panel badge-box', style: 'text-align:left' }, h('code', {}, 'npx gitcrawl-cli'), h('p', { class: 'muted' }, 'Or point it at a folder: npx gitcrawl-cli ~/code/my-app. Add --json dungeon.json to save the dungeon instead of opening it.')),
+      h(
+        'div',
+        { class: 'panel badge-box', style: 'text-align:left' },
+        h('code', {}, 'npx gitcrawl-cli'),
+        h('p', { class: 'muted' }, 'Or point it at a folder: npx gitcrawl-cli ~/code/my-app. Add --json dungeon.json to save the dungeon instead of opening it.'),
+      ),
+      connect,
       h('div', { class: 'button-row', style: 'justify-content:center' }, h('button', { class: 'btn', onclick: back }, 'Back')),
     ),
   );
+  void getAuthStatus().then(async (status) => {
+    if (!status?.enabled) return;
+    clear(connect);
+    connect.append(h('h2', {}, 'Or connect GitHub'));
+    if (!status.user) {
+      connect.append(
+        h('p', {}, 'Install the gitcrawl GitHub App on the repos you choose. It can only read them, and your code is processed in memory, never stored.'),
+        h('a', { class: 'btn primary', href: '/auth/login' }, 'Connect GitHub'),
+      );
+      return;
+    }
+    connect.append(h('p', {}, `Connected as @${status.user.login}. Pick a repo you gave gitcrawl access to:`));
+    const list = h('div', { class: 'chips', style: 'justify-content:flex-start' });
+    connect.append(list);
+    const repos = await getPrivateRepos();
+    if (!repos || repos.length === 0) {
+      list.append(h('p', { class: 'muted' }, 'No repos yet. Add some in the app installation settings on GitHub.'));
+      return;
+    }
+    for (const r of repos.slice(0, 30)) {
+      const ref = parseRepoInput(r.fullName);
+      if (ref) list.append(h('button', { class: 'chip', type: 'button', onclick: () => playPrivate(ref) }, r.fullName, r.private ? h('small', {}, ' private') : null));
+    }
+  });
 }

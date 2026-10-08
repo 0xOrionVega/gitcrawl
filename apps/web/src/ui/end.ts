@@ -37,8 +37,20 @@ export function badgeMarkdown(spec: DungeonSpec): string {
   return `[![Play ${spec.repo.fullName} on gitcrawl](${SITE_URL}/badge/${spec.repo.fullName}.svg)](${url})`;
 }
 
-export function renderEnd(root: HTMLElement, spec: DungeonSpec, stats: RunStats | null, actions: EndActions, opts: { daily: boolean; ref: RepoRef }) {
+/** Share cards for private repos never show names. */
+export function redactSpec(spec: DungeonSpec): DungeonSpec {
+  return {
+    ...spec,
+    repo: { ...spec.repo, owner: 'private', name: 'repo', fullName: 'a private repo', avatarUrl: null },
+    boss: spec.boss ? { ...spec.boss, name: 'a giant file', path: '' } : null,
+  };
+}
+
+export function renderEnd(root: HTMLElement, fullSpec: DungeonSpec, stats: RunStats | null, actions: EndActions, opts: { daily: boolean; ref: RepoRef }) {
   clear(root);
+  const isPrivate = fullSpec.repo.private;
+  const spec = fullSpec;
+  const cardSpec = isPrivate ? redactSpec(fullSpec) : fullSpec;
   const won = !!stats?.bossDefeated || (stats !== null && spec.boss === null);
   const link = `${SITE_URL}/r/${spec.repo.fullName}`;
   const inner = h('div', { class: 'page-inner' });
@@ -65,11 +77,12 @@ export function renderEnd(root: HTMLElement, spec: DungeonSpec, stats: RunStats 
   const cardCol = h('div', {}, img);
   const shareRow = h('div', { class: 'button-row' });
   cardCol.append(shareRow);
-  void renderShareCard(spec, stats).then(async (canvas) => {
+  void renderShareCard(cardSpec, stats).then(async (canvas) => {
     img.src = canvas.toDataURL('image/png');
     const blob = await canvasToBlob(canvas);
     const fileName = `gitcrawl-${spec.repo.owner}-${spec.repo.name}.png`;
-    const xUrl = `https://x.com/intent/post?text=${encodeURIComponent(shareText(spec, stats))}&url=${encodeURIComponent(link)}`;
+    const shareLink = isPrivate ? SITE_URL : link;
+    const xUrl = `https://x.com/intent/post?text=${encodeURIComponent(shareText(cardSpec, stats))}&url=${encodeURIComponent(shareLink)}`;
     shareRow.append(h('a', { class: 'btn primary', href: xUrl, target: '_blank', rel: 'noopener' }, 'Post on X'));
     if (blob && navigator.canShare?.({ files: [new File([blob], fileName, { type: 'image/png' })] })) {
       shareRow.append(
@@ -138,7 +151,7 @@ export function renderEnd(root: HTMLElement, spec: DungeonSpec, stats: RunStats 
   statCol.append(playRow);
 
   // ---- leaderboard
-  if (apiAvailable() && stats && won) {
+  if (apiAvailable() && stats && won && !isPrivate) {
     const list = h('ol');
     const nick = h('input', { maxlength: 16, placeholder: 'Your name for the leaderboard', 'aria-label': 'Nickname' }) as HTMLInputElement;
     nick.value = storage.get('nickname') ?? '';
@@ -176,7 +189,7 @@ export function renderEnd(root: HTMLElement, spec: DungeonSpec, stats: RunStats 
 
   // ---- badge
   const md = badgeMarkdown(spec);
-  inner.append(
+  if (!isPrivate) inner.append(
     h(
       'div',
       { class: 'section' },

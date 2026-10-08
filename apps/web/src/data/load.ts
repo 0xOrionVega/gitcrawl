@@ -53,9 +53,22 @@ export class LoadError extends Error {
 
 const cache = new Map<string, DungeonSpec>();
 
-export async function loadDungeon(ref: RepoRef, onProgress: (step: string) => void, opts: { refresh?: boolean } = {}): Promise<DungeonSpec> {
-  const key = `${ref.owner}/${ref.name}`.toLowerCase();
+export async function loadDungeon(ref: RepoRef, onProgress: (step: string) => void, opts: { refresh?: boolean; priv?: boolean } = {}): Promise<DungeonSpec> {
+  const key = `${opts.priv ? 'private:' : ''}${ref.owner}/${ref.name}`.toLowerCase();
   if (!opts.refresh && cache.has(key)) return cache.get(key)!;
+
+  if (opts.priv) {
+    if (API_BASE === null) throw new LoadError('Private repos need the gitcrawl server. Use the CLI to play private code locally.', 'other');
+    onProgress('Unlocking your private dungeon…');
+    const res = await fetch(`${API_BASE}/api/private/dungeon/${encodeURIComponent(ref.owner)}/${encodeURIComponent(ref.name)}`, { credentials: 'include' }).catch(() => null);
+    if (!res) throw new LoadError("Couldn't reach the gitcrawl server.", 'network');
+    if (res.status === 401) throw new LoadError('Connect GitHub to play private repos.', 'other');
+    if (res.status === 404) throw new LoadError('Not found, or the gitcrawl app is not installed on this repo.', 'not_found');
+    if (!res.ok) throw new LoadError('The server could not build this private dungeon.', 'other');
+    const spec = (await res.json()) as DungeonSpec;
+    cache.set(key, spec);
+    return spec;
+  }
 
   // 1. Fixtures
   if (DEMO || !opts.refresh) {
