@@ -285,7 +285,9 @@ export class DungeonScene extends Phaser.Scene {
 
     // Camera, fog, vignette.
     const cam = this.cameras.main;
-    cam.setBounds(0, 0, this.W * T, this.H * T);
+    // A little slack around the map so the hero can stay near the centre at the edges.
+    const pad = 96;
+    cam.setBounds(-pad, -pad, this.W * T + pad * 2, this.H * T + pad * 2);
     cam.setRoundPixels(true);
     this.applyZoom();
     const fogColor = Phaser.Display.Color.HexStringToColor(theme.palette.void);
@@ -1001,7 +1003,7 @@ export class DungeonScene extends Phaser.Scene {
     if (e.kind === 'boss' && this.spec.boss) {
       const loc = this.spec.boss.loc;
       const removed = Math.max(1, Math.round((dmg / e.maxHp) * loc));
-      this.floatText(`-${formatNumber(removed)} lines`, e.sprite.x, e.sprite.y - 44, '#ffd166');
+      this.floatText(`-${formatNumber(removed)} ${removed === 1 ? 'line' : 'lines'}`, e.sprite.x, e.sprite.y - 44, '#ffd166');
       const left = Math.max(0, Math.round((Math.max(0, e.hp) / e.maxHp) * loc));
       this.emit('boss', { state: 'hp', name: this.spec.boss.name, hp: Math.max(0, e.hp), maxHp: e.maxHp, loc, locLeft: left, phase: this.bossPhase });
     } else if (e.kind === 'miniboss') {
@@ -1147,12 +1149,14 @@ export class DungeonScene extends Phaser.Scene {
   }
 
   private onShotHit(shot: ArcadeSprite) {
-    if (!shot.active) return;
+    if (!shot.active || !shot.body) return;
+    const v = (shot.body as Phaser.Physics.Arcade.Body).velocity;
+    const dx = v.x;
+    const dy = v.y;
     shot.destroy();
     if (this.mode !== 'play') return;
-    const v = (shot.body as Phaser.Physics.Arcade.Body).velocity;
-    const len = Math.hypot(v.x, v.y) || 1;
-    this.hurtHero(1, v.x / len, v.y / len);
+    const len = Math.hypot(dx, dy) || 1;
+    this.hurtHero(1, dx / len, dy / len);
   }
 
   private hurtHero(dmg: number, dx: number, dy: number) {
@@ -1229,7 +1233,7 @@ export class DungeonScene extends Phaser.Scene {
   }
 
   private onArrowHit(a: ArcadeSprite, sprite: ArcadeSprite) {
-    if (!a.active) return;
+    if (!a.active || !a.body) return;
     const e = this.enemyBySprite.get(sprite);
     if (!e || e.state === 'dead') return;
     const v = (a.body as Phaser.Physics.Arcade.Body).velocity;
@@ -1768,6 +1772,18 @@ export class DungeonScene extends Phaser.Scene {
       b.container.setPosition(Math.round(x), Math.round(y));
       return true;
     });
+    // Stack overlapping bubbles instead of drawing them on top of each other.
+    const placed: Phaser.Geom.Rectangle[] = [];
+    for (const b of this.bubbles) {
+      let r = b.container.getBounds();
+      for (let guard = 0; guard < 6; guard++) {
+        const hit = placed.find((p) => Phaser.Geom.Rectangle.Overlaps(p, r));
+        if (!hit) break;
+        b.container.y -= r.bottom - hit.top + 2;
+        r = b.container.getBounds();
+      }
+      placed.push(r);
+    }
   }
 
   private burst(x: number, y: number, color: number, count: number, gravity = 120) {

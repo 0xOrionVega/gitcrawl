@@ -503,7 +503,8 @@ export function generateDungeon(snapshot: RepoSnapshot, _opts: GenerateOptions =
       name: bf.name,
       loc: bf.loc,
       exactLoc: bf.exact,
-      hp: TUNING.enemies.boss.hp,
+      // Tiny files make short, silly fights; giant files cap at the full boss HP.
+      hp: Math.round(Math.min(TUNING.enemies.boss.hp, Math.max(10, 10 + Math.sqrt(bf.loc) * 0.5))),
       url: blobUrl(htmlUrl, sha, bf.path),
       taunts: a.taunts.length > 0 ? a.taunts : genericTaunts(bf),
       language: bf.lang,
@@ -951,6 +952,9 @@ function selectFolders(a: Analysis): FolderInfo[] {
 
 function genericTaunts(file: FileInfo): string[] {
   const loc = file.loc.toLocaleString('en-US');
+  if (file.loc < 20) {
+    return [`I am ${file.loc === 1 ? 'one line' : `${loc} lines`} long and I fear nothing.`, 'Small file, big attitude.', 'You came all this way for me?'];
+  }
   return [
     `I am ${loc} lines of pure legacy.`,
     'Refactor me? Many have tried.',

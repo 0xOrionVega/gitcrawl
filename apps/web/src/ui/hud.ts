@@ -180,7 +180,7 @@ export class Hud {
     }
     this.bossbar.hidden = false;
     this.bossName.textContent = p.name;
-    this.bossLoc.textContent = `${formatNumber(p.locLeft)} lines left`;
+    this.bossLoc.textContent = `${formatNumber(p.locLeft)} ${p.locLeft === 1 ? 'line' : 'lines'} left`;
     this.bossFill.style.width = `${Math.max(0, (p.hp / p.maxHp) * 100)}%`;
   }
 
