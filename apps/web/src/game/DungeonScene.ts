@@ -575,7 +575,7 @@ export class DungeonScene extends Phaser.Scene {
           this.fixStaticBody(s, 14, 8);
           this.addInteract('throne', x, y - 6, 30, () => 'Sit on the throne', () => {
             this.emit('dialog', { kind: 'throne', title: 'The Empty Throne', text: e.text });
-            this.time.delayedCall(1200, () => this.win());
+            window.setTimeout(() => this.scene.isActive() && this.win(), 1200);
           });
           break;
         }
@@ -1318,7 +1318,7 @@ export class DungeonScene extends Phaser.Scene {
           e.state = 'chase';
           if (e.kind === 'goblin' && Math.random() < 0.5) this.sfx('goblin');
           // Monsters shout what they are when they spot you (a few at a time).
-          if (!e.revealed && this.bubbles.length < 3) {
+          if (!e.revealed && this.bubbles.length < 2) {
             e.revealed = true;
             this.revealEnemy(e);
           }
@@ -1532,7 +1532,8 @@ export class DungeonScene extends Phaser.Scene {
     this.tweens.add({ targets: s, alpha: 0, scale: 1.3, duration: 1100, delay: 300, onComplete: () => s.destroy() });
     e.label?.destroy();
     e.shadow.destroy();
-    this.time.delayedCall(1800, () => this.win());
+    // Real time, not game time: the victory screen must not wait on a slow frame rate.
+    window.setTimeout(() => this.scene.isActive() && this.win(), 1800);
   }
 
   private win() {
@@ -1772,8 +1773,10 @@ export class DungeonScene extends Phaser.Scene {
       b.container.setPosition(Math.round(x), Math.round(y));
       return true;
     });
-    // Stack overlapping bubbles instead of drawing them on top of each other.
+    // Stack overlapping bubbles instead of drawing them on top of each other;
+    // a bubble that would be pushed under the HUD waits its turn (hidden).
     const placed: Phaser.Geom.Rectangle[] = [];
+    const topLimit = cam.worldView.y + 150 / cam.zoom;
     for (const b of this.bubbles) {
       let r = b.container.getBounds();
       for (let guard = 0; guard < 6; guard++) {
@@ -1782,7 +1785,9 @@ export class DungeonScene extends Phaser.Scene {
         b.container.y -= r.bottom - hit.top + 2;
         r = b.container.getBounds();
       }
-      placed.push(r);
+      const fits = r.top >= topLimit - 2 && !placed.some((p) => Phaser.Geom.Rectangle.Overlaps(p, r));
+      b.container.setVisible(fits);
+      if (fits) placed.push(r);
     }
   }
 

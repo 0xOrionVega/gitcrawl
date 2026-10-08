@@ -258,8 +258,10 @@ export function analyzeSnapshot(snapshot: RepoSnapshot): Analysis {
   let langBytes: Record<string, number> = snapshot.languages;
   if (Object.keys(langBytes).length === 0) {
     langBytes = {};
+    // Translation catalogs (e.g. Qt's *.ts files) are data, not code.
+    const DATA_DIRS = /(^|\/)(locales?|i18n|l10n|translations?|lang|po)\//i;
     for (const f of files) {
-      if (!f.lang || f.pit || f.generated || f.binary) continue;
+      if (!f.lang || f.pit || f.generated || f.binary || DATA_DIRS.test(f.path)) continue;
       langBytes[f.lang] = (langBytes[f.lang] ?? 0) + f.size;
     }
   }

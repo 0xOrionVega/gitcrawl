@@ -38,15 +38,15 @@ export function ensureGame(parent: HTMLElement): Promise<void> {
 
 export function startDungeon(spec: DungeonSpec, mode: GameMode) {
   if (!game) throw new Error('Game not created');
-  const scene = game.scene.getScene('dungeon');
-  if (scene && scene.scene.isActive()) scene.scene.stop();
+  // Use the SceneManager for both calls: ScenePlugin.stop() is always queued to
+  // the next frame and would shut down the freshly started scene.
+  if (game.scene.isActive('dungeon') || game.scene.isPaused('dungeon') || game.scene.isSleeping('dungeon')) game.scene.stop('dungeon');
   game.scene.start('dungeon', { spec, mode, bus });
 }
 
 export function stopDungeon() {
   if (!game) return;
-  const scene = game.scene.getScene('dungeon');
-  if (scene && scene.scene.isActive()) scene.scene.stop();
+  if (game.scene.isActive('dungeon') || game.scene.isPaused('dungeon')) game.scene.stop('dungeon');
 }
 
 export function getDungeon(): DungeonScene | null {

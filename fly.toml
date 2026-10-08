@@ -1,0 +1,37 @@
+# fly launch --copy-config --no-deploy, then:
+#   fly volumes create gitcrawl_data --size 1
+#   fly secrets set GITHUB_TOKEN=... SITE_URL=https://your-domain
+#   fly deploy
+app = "gitcrawl"
+primary_region = "ams"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8080"
+  CACHE_DIR = "/data/cache"
+  WEB_DIST = "/app/web"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    path = "/api/health"
+    timeout = "5s"
+
+[[mounts]]
+  source = "gitcrawl_data"
+  destination = "/data"
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1

@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-08T03:47:47.134Z",
+  "generatedAt": "2026-10-08T03:59:28.669Z",
   "repos": [
     {
       "fullName": "bitcoin/bitcoin",
       "file": "bitcoin__bitcoin.json",
       "title": "Lair of the Colossus",
-      "theme": "azure",
+      "theme": "forge",
       "files": 3052,
       "todos": 47,
       "boss": {
@@ -14,7 +14,7 @@
       },
       "health": 90,
       "grade": "A",
-      "language": "TypeScript"
+      "language": "C++"
     },
     {
       "fullName": "BurntSushi/ripgrep",

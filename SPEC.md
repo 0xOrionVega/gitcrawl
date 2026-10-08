@@ -1,5 +1,7 @@
 # SPEC — gitcrawl
 
+> **Build status (2026-10-08):** milestones M1–M9 are implemented (see README). Verified with unit/API tests and headless-Chrome playthroughs on real repos. Not yet verified against the live GitHub API from this environment (it was blocked; covered by mocked-response tests and git-based fixtures), the GitHub App flow end to end (needs a real App), and the Docker image (no Docker daemon; the build steps were run by hand).
+
 Paste any public GitHub repo URL → it becomes a playable, good-looking dungeon in the browser. No install, no login. Built to be shared: every run ends with a screenshot-ready card.
 
 Not a terminal game (GitHub Dungeons already does that in the CLI). The identity here is: **web, visual, and the dungeon is generated from what's actually in the code**.

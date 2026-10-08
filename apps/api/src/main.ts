@@ -1,5 +1,9 @@
+import { existsSync } from 'node:fs';
 import { loadConfig } from './config.js';
 import { buildServer } from './server.js';
+
+// Load .env when present (Node 22 has a built-in loader).
+if (existsSync('.env')) process.loadEnvFile('.env');
 
 const cfg = loadConfig();
 const app = await buildServer(cfg);
