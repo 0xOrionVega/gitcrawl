@@ -51,6 +51,7 @@ class AudioEngine {
   private master!: GainNode;
   private sfxBus!: GainNode;
   private musicBus!: GainNode;
+  private recordOut: MediaStreamAudioDestinationNode | null = null;
   private noiseBuf: AudioBuffer | null = null;
   private lastPlayed = new Map<Sfx, number>();
   muted = storage.get('muted') === '1';
@@ -84,6 +85,23 @@ class AudioEngine {
       }
     }
     if (this.ctx.state === 'suspended') void this.ctx.resume();
+  }
+
+  /**
+   * Audio track for clip recording. Tapped before the mute control, so clips
+   * keep their sound even when the player has muted the game.
+   */
+  recordingTrack(): MediaStreamTrack | null {
+    if (!this.ctx || typeof this.ctx.createMediaStreamDestination !== 'function') return null;
+    if (!this.recordOut) {
+      this.recordOut = this.ctx.createMediaStreamDestination();
+      const tap = this.ctx.createGain();
+      tap.gain.value = 0.9;
+      this.sfxBus.connect(tap);
+      this.musicBus.connect(tap);
+      tap.connect(this.recordOut);
+    }
+    return this.recordOut.stream.getAudioTracks()[0] ?? null;
   }
 
   get unlocked() {

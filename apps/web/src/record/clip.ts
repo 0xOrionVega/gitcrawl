@@ -1,17 +1,21 @@
 /**
- * Gameplay clips. The game canvas is composited with a small watermark into a
- * recording canvas, so every shared clip carries the repo name and the site.
+ * Gameplay clips. The game canvas, the HUD and a small watermark are composited
+ * into a recording canvas, and the game audio is mixed in, so a clip shows and
+ * sounds like what the player saw. Every shared clip carries the repo name.
  *
  * Boss fights use two overlapping recorders (offset by half a period) so that
  * when the boss dies there is always one recording holding the last 8-16 s.
  */
 import { getCanvas } from '../game/host';
+import { audio } from '../audio/audio';
+import { paintOverlays } from './overlay';
 
 const PERIOD_MS = 16_000;
 
 function pickMime(): string | null {
   if (typeof MediaRecorder === 'undefined') return null;
-  for (const m of ['video/mp4;codecs=avc1', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4']) {
+  const withAudio = ['video/mp4;codecs=avc1,mp4a.40.2', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus'];
+  for (const m of [...withAudio, 'video/mp4;codecs=avc1', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4']) {
     try {
       if (MediaRecorder.isTypeSupported(m)) return m;
     } catch {
@@ -61,6 +65,8 @@ class Compositor {
     const ctx = this.ctx;
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(src, 0, 0, w, h);
+    paintOverlays(ctx, src, w);
+    ctx.globalAlpha = 1;
     const pad = Math.round(h * 0.025);
     const size = Math.max(12, Math.round(h * 0.03));
     ctx.font = `${size}px "Press Start 2P", monospace`;
@@ -84,7 +90,7 @@ class Recorder {
 
   start(stream: MediaStream) {
     this.chunks = [];
-    this.rec = new MediaRecorder(stream, { mimeType: this.mime, videoBitsPerSecond: 4_000_000 });
+    this.rec = new MediaRecorder(stream, { mimeType: this.mime, videoBitsPerSecond: 4_000_000, audioBitsPerSecond: 128_000 });
     this.rec.ondataavailable = (e) => e.data.size > 0 && this.chunks.push(e.data);
     this.rec.start(500);
     this.startedAt = performance.now();
@@ -131,12 +137,14 @@ export class ClipManager {
 
   private ensureStream(): MediaStream | null {
     if (!this.mime) return null;
-    if (!this.stream) {
-      compositor.start();
-      this.stream = compositor.canvas.captureStream(30);
-    } else {
-      compositor.start();
-    }
+    compositor.start();
+    if (!this.stream) this.stream = compositor.canvas.captureStream(30);
+    // The audio context only exists once the player has interacted, so add
+    // the sound track whenever it becomes available (never under a running
+    // recorder, which would stop it).
+    const idle = !this.pair && !this.manual;
+    const track = idle && this.mime.includes(',') ? audio.recordingTrack() : null;
+    if (track && this.stream.getAudioTracks().length === 0) this.stream.addTrack(track);
     return this.stream;
   }
 
