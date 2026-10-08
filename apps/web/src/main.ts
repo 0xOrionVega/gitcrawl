@@ -5,7 +5,7 @@ import './styles.css';
 
 import type { DungeonSpec, RepoRef } from '@gitcrawl/shared';
 import { $, clear, h, isTouchDevice } from './util/dom';
-import { bus, ensureGame, getDungeon, setPaused, startDungeon } from './game/host';
+import { bus, ensureGame, getDungeon, setDialogOpen, setPaused, startDungeon } from './game/host';
 import { audio } from './audio/audio';
 import { Hud } from './ui/hud';
 import { Dialog } from './ui/dialog';
@@ -327,7 +327,7 @@ function wireBus() {
   bus.on('dialog', (p) => {
     if (p) dialog.show(p);
     else dialog.hide();
-    getDungeon()?.setDialogOpen(!!p);
+    setDialogOpen(!!p);
   });
   bus.on('toast', (p) => toast(p.text, p.tone));
   bus.on('boss', (p) => {
@@ -360,7 +360,7 @@ function wireBus() {
       }, 900);
     });
   });
-  dialog.setOnClose(() => getDungeon()?.setDialogOpen(false));
+  dialog.setOnClose(() => setDialogOpen(false));
 }
 
 function wireKeys() {

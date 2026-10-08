@@ -55,13 +55,27 @@ export function getDungeon(): DungeonScene | null {
   return scene && scene.scene.isActive() ? scene : null;
 }
 
+/** The dungeon scene while it is running or paused (getDungeon skips paused scenes). */
+function getDungeonAny(): DungeonScene | null {
+  if (!game) return null;
+  if (!game.scene.isActive('dungeon') && !game.scene.isPaused('dungeon')) return null;
+  return game.scene.getScene('dungeon') as DungeonScene | null;
+}
+
+export function setDialogOpen(open: boolean) {
+  getDungeonAny()?.setDialogOpen(open);
+}
+
 export function getCanvas(): HTMLCanvasElement | null {
   return game?.canvas ?? null;
 }
 
 export function setPaused(paused: boolean) {
-  const scene = getDungeon();
-  if (!scene) return;
-  if (paused) scene.scene.pause();
-  else scene.scene.resume();
+  if (!game) return;
+  // A paused scene is not "active", so look it up through the SceneManager.
+  if (paused) {
+    if (game.scene.isActive('dungeon')) game.scene.pause('dungeon');
+  } else if (game.scene.isPaused('dungeon')) {
+    game.scene.resume('dungeon');
+  }
 }
