@@ -154,6 +154,7 @@ export class DungeonScene extends Phaser.Scene {
   private attractIdx = 0;
   private nextAttractAt = 0;
   private dialogOpen = false;
+  private dialogAnchor: { x: number; y: number } | null = null;
   private particles!: Phaser.GameObjects.Particles.ParticleEmitter;
 
   constructor() {
@@ -1607,7 +1608,11 @@ export class DungeonScene extends Phaser.Scene {
     if (best !== this.currentHint) {
       this.currentHint = best;
       this.emit('hint', best ? { text: best.hint() ?? '' } : null);
-      if (!best && this.dialogOpen) this.emit('dialog', null);
+    }
+    // Close an open dialog once the player walks away from where they opened it.
+    if (this.dialogOpen && this.dialogAnchor && Phaser.Math.Distance.Between(this.hero.x, this.hero.y, this.dialogAnchor.x, this.dialogAnchor.y) > 56) {
+      this.dialogAnchor = null;
+      this.emit('dialog', null);
     }
     // Proximity labels for crates: show filename when close.
     for (const obj of this.solids.getChildren() as Phaser.Physics.Arcade.Sprite[]) {
@@ -1634,6 +1639,7 @@ export class DungeonScene extends Phaser.Scene {
     audio.unlock();
     if (this.currentHint) {
       this.sfx('click');
+      this.dialogAnchor = { x: this.hero.x, y: this.hero.y };
       this.currentHint.run();
     }
   }
@@ -1817,6 +1823,7 @@ export class DungeonScene extends Phaser.Scene {
       hero: () => ({ x: this.hero.x, y: this.hero.y, hp: this.hp }),
       moveTo: (x: number, y: number) => this.hero.setPosition(x, y),
       entities: () => this.spec.entities,
+      audio,
     };
   }
 }

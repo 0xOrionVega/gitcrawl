@@ -22,9 +22,16 @@ export interface FixtureIndexEntry {
 
 let fixtureIndex: Promise<FixtureIndexEntry[]> | null = null;
 
+/** Resolve an asset path against the app root (works for path routing, hash routing and file://). */
+export function assetUrl(path: string): string {
+  const base = import.meta.env.BASE_URL;
+  const root = base === './' || base === '' ? new URL('.', document.baseURI) : new URL(base, location.origin);
+  return new URL(path, root).href;
+}
+
 export function loadFixtureIndex(): Promise<FixtureIndexEntry[]> {
   if (!fixtureIndex) {
-    fixtureIndex = fetch(new URL('fixtures/index.json', document.baseURI).href)
+    fixtureIndex = fetch(assetUrl('fixtures/index.json'))
       .then((r) => (r.ok ? r.json() : { repos: [] }))
       .then((j: { repos: FixtureIndexEntry[] }) => j.repos ?? [])
       .catch(() => []);
@@ -36,7 +43,7 @@ export async function loadFixture(fullName: string): Promise<DungeonSpec | null>
   const index = await loadFixtureIndex();
   const entry = index.find((e) => e.fullName.toLowerCase() === fullName.toLowerCase());
   if (!entry) return null;
-  const res = await fetch(new URL(`fixtures/${entry.file}`, document.baseURI).href);
+  const res = await fetch(assetUrl(`fixtures/${entry.file}`));
   if (!res.ok) return null;
   return (await res.json()) as DungeonSpec;
 }
@@ -119,7 +126,7 @@ export async function loadDungeon(ref: RepoRef, onProgress: (step: string) => vo
 /** Dungeon served by the local CLI (gitcrawl-cli). */
 export async function loadLocalDungeon(): Promise<DungeonSpec | null> {
   try {
-    const res = await fetch(new URL('local/dungeon.json', document.baseURI).href);
+    const res = await fetch(assetUrl('local/dungeon.json'));
     if (!res.ok) return null;
     return (await res.json()) as DungeonSpec;
   } catch {
