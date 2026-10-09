@@ -109,17 +109,17 @@ describe('gitcrawl API', () => {
     const spec = (await app.inject({ method: 'GET', url: '/api/dungeon/demo/thing' })).json();
     const bad = await app.inject({ method: 'POST', url: '/api/runs/demo/thing', payload: { nickname: '<script>', timeMs: 60000, seed: spec.seed } });
     expect(bad.statusCode).toBe(400);
-    const tooFast = await app.inject({ method: 'POST', url: '/api/runs/demo/thing', payload: { nickname: 'oleg', timeMs: 100, seed: spec.seed } });
+    const tooFast = await app.inject({ method: 'POST', url: '/api/runs/demo/thing', payload: { nickname: 'player', timeMs: 100, seed: spec.seed } });
     expect(tooFast.statusCode).toBe(400);
-    const wrongSeed = await app.inject({ method: 'POST', url: '/api/runs/demo/thing', payload: { nickname: 'oleg', timeMs: 60000, seed: 1 } });
+    const wrongSeed = await app.inject({ method: 'POST', url: '/api/runs/demo/thing', payload: { nickname: 'player', timeMs: 60000, seed: 1 } });
     expect(wrongSeed.statusCode).toBe(409);
-    const ok = await app.inject({ method: 'POST', url: '/api/runs/demo/thing', payload: { nickname: 'oleg', timeMs: 60000, goblins: 4, deaths: 1, seed: spec.seed } });
+    const ok = await app.inject({ method: 'POST', url: '/api/runs/demo/thing', payload: { nickname: 'player', timeMs: 60000, goblins: 4, deaths: 1, seed: spec.seed } });
     expect(ok.statusCode).toBe(200);
     expect(ok.json().rank).toBe(1);
     const faster = await app.inject({ method: 'POST', url: '/api/runs/demo/thing', payload: { nickname: 'speedy', timeMs: 30000, goblins: 1, deaths: 0, seed: spec.seed } });
     expect(faster.json().rank).toBe(1);
     const board = (await app.inject({ method: 'GET', url: '/api/leaderboard/demo/thing' })).json();
-    expect(board.entries.map((e: { nickname: string }) => e.nickname)).toEqual(['speedy', 'oleg']);
+    expect(board.entries.map((e: { nickname: string }) => e.nickname)).toEqual(['speedy', 'player']);
   });
 
   it('renders badges, share images and the hall', async () => {
@@ -151,8 +151,8 @@ describe('gitcrawl API', () => {
   it('keeps private-repo auth disabled without config, and seals sessions', async () => {
     const status = (await app.inject({ method: 'GET', url: '/auth/status' })).json();
     expect(status.enabled).toBe(false);
-    const sealed = seal({ token: 'x', login: 'oleg' }, 'secret');
-    expect(unseal<{ login: string }>(sealed, 'secret')?.login).toBe('oleg');
+    const sealed = seal({ token: 'x', login: 'player' }, 'secret');
+    expect(unseal<{ login: string }>(sealed, 'secret')?.login).toBe('player');
     expect(unseal(sealed, 'other-secret')).toBeNull();
   });
 });

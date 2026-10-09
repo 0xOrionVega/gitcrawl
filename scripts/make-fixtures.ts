@@ -44,8 +44,8 @@ for (const full of repos) {
   try {
     if (full === 'self') {
       // This repo itself.
-      const snap = await localSnapshot(root, { owner: '0xRhinoX', name: 'gitcrawl', source: 'fixture' });
-      write('0xRhinoX', 'gitcrawl', snap);
+      const snap = await localSnapshot(root, { owner: 'gitcrawl', name: 'gitcrawl', source: 'fixture' });
+      write('gitcrawl', 'gitcrawl', snap);
       continue;
     }
     if (!existsSync(dir)) {
