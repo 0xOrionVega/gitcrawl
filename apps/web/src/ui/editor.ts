@@ -9,6 +9,7 @@ import { h, clear } from '../util/dom';
 
 const EXTENSION_ID = 'Orion-vega.gitcrawl';
 export const MARKETPLACE_URL = `https://marketplace.visualstudio.com/items?itemName=${EXTENSION_ID}`;
+const OPEN_VSX_URL = `https://open-vsx.org/extension/${EXTENSION_ID.replace('.', '/')}`;
 
 const MONSTERS: [S.PixelSprite, string, string, string][] = [
   [S.GOBLIN_A, 'Goblin', 'TODO', '2 hits. Quick on its feet.'],
@@ -64,8 +65,9 @@ export function renderEditor(root: HTMLElement, actions: { home: () => void; gui
         'div',
         { class: 'button-row' },
         h('a', { class: 'btn primary', href: MARKETPLACE_URL, target: '_blank', rel: 'noopener' }, 'Install for VS Code'),
+        h('a', { class: 'btn primary', href: OPEN_VSX_URL, target: '_blank', rel: 'noopener' }, 'Install for Cursor'),
       ),
-      h('p', { class: 'muted' }, 'Or search "gitcrawl" in the VS Code Extensions panel. Cursor support is coming soon. Free, open source, and your code never leaves the editor: the monsters are only decorations.'),
+      h('p', { class: 'muted' }, 'Or search "gitcrawl" in the Extensions panel of VS Code, Cursor, Windsurf or VSCodium. Free, open source, and your code never leaves the editor: the monsters are only decorations.'),
       h(
         'div',
         { class: 'section' },
