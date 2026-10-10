@@ -1635,7 +1635,3 @@ img.px {
   background: var(--torch);
   border: 2px solid var(--ink);
 }
-
-.private-option .cmd.soon {
-  opacity: 0.55;
-}

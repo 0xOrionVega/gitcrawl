@@ -1,5 +1,7 @@
 # gitcrawl
 
+[![npm](https://img.shields.io/npm/v/gitcrawl-cli)](https://www.npmjs.com/package/gitcrawl-cli)
+
 Paste any GitHub repo and play it as a dungeon in the browser.
 
 Folders become rooms, the biggest file is the boss, every `TODO` is a goblin, open issues haunt the halls as ghosts, stale branches rattle around a crypt, and the lockfile is a bottomless pit. Every monster is a real finding, so when the run ends you get a loot report: the files to split, the oldest TODOs, the branches to prune and the issues where newcomers can start.
@@ -52,7 +54,13 @@ pnpm build
 node packages/cli/dist/main.js C:\code\my-app
 ```
 
-Published to npm, that becomes `npx gitcrawl-cli`. Nothing leaves your machine.
+Or use the published package from inside any repo:
+
+```sh
+npx gitcrawl-cli
+```
+
+It builds the dungeon on your machine and serves it on `http://localhost:4747`. Nothing leaves your machine. See [packages/cli](packages/cli) for options.
 
 ### Static demo
 

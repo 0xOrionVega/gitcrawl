@@ -65,7 +65,7 @@ export async function loadDungeon(ref: RepoRef, onProgress: (step: string) => vo
   if (!opts.refresh && cache.has(key)) return cache.get(key)!;
 
   if (opts.priv) {
-    if (API_BASE === null) throw new LoadError('Private repos need the gitcrawl server.', 'other');
+    if (API_BASE === null) throw new LoadError('Private repos need the gitcrawl server. Use the CLI to play private code locally.', 'other');
     onProgress('Unlocking your private dungeon…');
     const res = await fetch(`${API_BASE}/api/private/dungeon/${encodeURIComponent(ref.owner)}/${encodeURIComponent(ref.name)}`, { credentials: 'include' }).catch(() => null);
     if (!res) throw new LoadError("Couldn't reach the gitcrawl server.", 'network');

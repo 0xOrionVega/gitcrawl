@@ -1,5 +1,5 @@
 /**
- * Private repos: the two ways in (the CLI on your machine, coming soon, or the read-only
+ * Private repos: the two ways in (the CLI on your machine, or the read-only
  * GitHub App) and the privacy page that explains exactly what happens to code.
  */
 import { parseRepoInput, type RepoRef } from '@gitcrawl/shared';
@@ -39,10 +39,11 @@ export function renderPrivate(root: HTMLElement, actions: { home: () => void; pr
         h(
           'div',
           { class: 'panel private-option' },
-          h('h2', {}, 'On your machine ', h('span', { class: 'soon-badge' }, 'Coming soon')),
+          h('h2', {}, 'On your machine'),
           h('p', { class: 'safe-tag' }, 'Safest: nothing leaves your computer'),
-          h('p', {}, 'A one-line command you run inside any git repo. It builds the dungeon on your own machine and opens it in your browser. Your code is never uploaded.'),
-          h('code', { class: 'cmd soon' }, 'npx gitcrawl-cli'),
+          h('p', {}, 'Run the CLI inside any git repo. It builds the dungeon locally and opens it in your browser on localhost.'),
+          h('code', { class: 'cmd' }, 'npx gitcrawl-cli'),
+          h('p', { class: 'muted' }, 'Or point it at a folder: npx gitcrawl-cli ~/code/my-app. Add --json dungeon.json to save the dungeon instead.'),
         ),
         connect,
       ),
@@ -58,7 +59,7 @@ async function fillConnect(box: HTMLElement, play: (ref: RepoRef) => void) {
   box.append(h('h2', {}, 'Connect GitHub'), h('p', { class: 'safe-tag' }, 'Read-only, only the repos you choose'));
   if (!status?.enabled) {
     box.querySelector('h2')?.append(' ', h('span', { class: 'soon-badge' }, 'Coming soon'));
-    box.append(h('p', {}, 'Sign in with GitHub, pick the repos you want, and play them right here. Read-only access, nothing stored.'));
+    box.append(h('p', {}, 'Sign in with GitHub, pick the repos you want, and play them right here. Read-only access, nothing stored. Until then, use the CLI: it works with any repo and nothing is uploaded.'));
     return;
   }
   if (!status.user) {
@@ -115,7 +116,7 @@ export function renderPrivacy(root: HTMLElement, actions: { home: () => void; ba
       qa('Who can see my private dungeon?', 'Only you, while you are signed in. Private dungeons are never cached on disk, never listed in the Hall of Shame, the daily raid or leaderboards, and have no public link. Share cards and clips say "a private repo" instead of the name.'),
       qa('Where is my GitHub login kept?', 'In one encrypted, HttpOnly cookie in your browser (AES-256-GCM). Page scripts cannot read it, and it expires after 8 hours at most. gitcrawl keeps no account database.'),
       qa('How do I cut off access?', 'Click Disconnect on the private page: the token is revoked on GitHub and your cached dungeons are deleted. To remove the app completely, uninstall it in GitHub → Settings → Applications.'),
-      qa('I want zero uploads.', 'Coming soon: a command-line version, npx gitcrawl-cli, that reads your code on your own machine and serves the game on localhost. Nothing is sent to gitcrawl.'),
+      qa('I want zero uploads.', 'Use the CLI: npx gitcrawl-cli inside your repo. It reads your code on your own machine and serves the game on localhost. Nothing is sent to gitcrawl.'),
     ),
   );
   root.scrollTop = 0;
