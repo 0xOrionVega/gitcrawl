@@ -129,7 +129,7 @@ class RaidSession {
 
     this.status = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1000);
     this.status.command = 'gitcrawl.endRaid';
-    this.status.tooltip = `gitcrawl raid: ${process.platform === 'darwin' ? '⌥Space' : 'Ctrl+Alt+Space'} to swing, click here to end it`;
+    this.status.tooltip = 'gitcrawl raid: Shift+Space to swing, click here to end it';
     this.status.show();
 
     this.disposables.push(
@@ -147,8 +147,7 @@ class RaidSession {
     void vscode.commands.executeCommand('setContext', 'gitcrawl.raiding', true);
     this.timer = setInterval(() => this.loop(), TICK_MS);
     this.render();
-    const key = process.platform === 'darwin' ? '⌥Space' : 'Ctrl+Alt+Space';
-    vscode.window.setStatusBarMessage(`gitcrawl: ${this.raid.monsters.length} monsters in this file. Press ${key} to swing at them.`, 6000);
+    vscode.window.setStatusBarMessage(`gitcrawl: ${this.raid.monsters.length} monsters in this file. Press Shift+Space to swing at them.`, 6000);
   }
 
   private spriteType(name: string, extraCss: string) {
@@ -187,8 +186,8 @@ class RaidSession {
   }
 
   swing() {
-    const editor = this.editor();
-    if (this.ended || !editor || editor !== vscode.window.activeTextEditor) return;
+    const editor = vscode.window.activeTextEditor;
+    if (this.ended || !editor || editor.document !== this.doc) return;
     const cursor = this.cursor(editor);
     const events = swing(this.raid, this.board(), cursor, Date.now());
     if (events.length === 0) return;

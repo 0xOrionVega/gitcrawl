@@ -80,8 +80,7 @@
     "keybindings": [
       {
         "command": "gitcrawl.swing",
-        "key": "ctrl+alt+space",
-        "mac": "alt+space",
+        "key": "shift+space",
         "when": "gitcrawl.raiding && editorTextFocus"
       }
     ],
