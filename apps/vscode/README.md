@@ -2,6 +2,8 @@
 
 Your TODOs come alive and hunt your cursor.
 
+![A raid: run the command, swing with Shift+Space, dodge a bite, delete a TODO to banish it](https://raw.githubusercontent.com/0xOrionVega/gitcrawl/main/apps/vscode/media/screenshots/demo.gif)
+
 Run **gitcrawl: Raid This File** and every TODO-style comment in the open file turns into a pixel monster standing on its own keyword. Move near one and it wakes up, shouts its TODO at you and comes for your cursor.
 
 | Comment | Monster | HP | Speed |

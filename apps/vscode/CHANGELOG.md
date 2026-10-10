@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- Demo animation and step-by-step instructions on the extension page.
+
 ## 0.1.0
 
 - Raid This File: TODO goblins, FIXME skeletons, HACK slimes and BUG ghosts hunt your cursor.

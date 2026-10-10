@@ -18,6 +18,7 @@ Folders become rooms, the biggest file is the boss, every `TODO` is a goblin, op
 - **Sharing built in.** Share card, link previews on X, a boss-kill clip recorded automatically during the fight, and a README badge that shows your dungeon health.
 - **Versus mode**, a **daily raid**, leaderboards and a **Hall of Shame**.
 - **Private code**: run `npx gitcrawl-cli` inside any repo. The dungeon is built on your machine and opened on localhost. Or connect a read-only GitHub App on the hosted site.
+- **TODO Raid in your editor.** A VS Code and Cursor extension: your TODOs turn into goblins that hunt your text cursor. Fix the TODO to banish it.
 - **No assets.** All pixel art, tiles, music and sound effects are generated in code.
 
 | Boss fight | Victory | Loot report |
@@ -61,6 +62,12 @@ npx gitcrawl-cli
 ```
 
 It builds the dungeon on your machine and serves it on `http://localhost:4747`. Nothing leaves your machine. See [packages/cli](packages/cli) for options.
+
+### TODO Raid for VS Code and Cursor
+
+![TODO Raid](https://raw.githubusercontent.com/0xOrionVega/gitcrawl/main/apps/vscode/media/screenshots/demo.gif)
+
+Install **gitcrawl: TODO Raid** from the VS Code Marketplace or Open VSX, open a file with TODOs and run **gitcrawl: Raid This File** from the Command Palette. Swing with **Shift+Space**. Source and build steps: [apps/vscode](apps/vscode).
 
 ### Static demo
 
