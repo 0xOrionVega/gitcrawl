@@ -4,14 +4,25 @@
   "description": "Play any git repo on your machine as a dungeon. Your code never leaves your computer.",
   "type": "module",
   "license": "MIT",
+  "author": "0xOrionVega (https://github.com/0xOrionVega)",
+  "homepage": "https://github.com/0xOrionVega/gitcrawl#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/0xOrionVega/gitcrawl.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/0xOrionVega/gitcrawl/issues"
+  },
   "bin": {
-    "gitcrawl": "./dist/main.js"
+    "gitcrawl": "dist/main.js"
   },
   "files": [
     "dist"
   ],
   "scripts": {
     "build": "tsup && node scripts/copy-web.mjs",
+    "prepublishOnly": "pnpm -w build",
     "typecheck": "tsc -p tsconfig.json",
     "start": "tsx src/main.ts"
   },
@@ -23,5 +34,11 @@
   "engines": {
     "node": ">=20"
   },
-  "keywords": ["git", "dungeon", "game", "code-health", "todo"]
+  "keywords": [
+    "git",
+    "dungeon",
+    "game",
+    "code-health",
+    "todo"
+  ]
 }
