@@ -13,6 +13,10 @@ export function metaFor(siteUrl: string, path: string, spec: DungeonSpec | null,
     const boss = spec.boss ? `Boss: ${spec.boss.name} (${spec.boss.loc.toLocaleString('en-US')} lines). ` : '';
     description = `${boss}${spec.stats.todos.toLocaleString('en-US')} TODOs to fight. Dungeon health ${spec.health.score}/100. Can you clear it?`;
     image = `${siteUrl}/og/${spec.repo.owner}/${spec.repo.name}.png`;
+  } else if (path === '/editor') {
+    title = 'TODO Raid for VS Code and Cursor | gitcrawl';
+    description = 'Your TODOs come alive as pixel monsters and hunt your cursor. Fix the TODO to banish it for good.';
+    image = `${siteUrl}/media/todo-raid-og.jpg`;
   } else if (fallback) {
     title = `${fallback.owner}/${fallback.name} as a dungeon | gitcrawl`;
     image = `${siteUrl}/og/${fallback.owner}/${fallback.name}.png`;

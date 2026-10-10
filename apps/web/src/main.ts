@@ -13,6 +13,7 @@ import { mountToasts, toast } from './ui/toast';
 import { TouchControls } from './ui/touch';
 import { renderLanding, rememberRepo } from './ui/landing';
 import { renderPrivacy, renderPrivate } from './ui/private';
+import { renderEditor } from './ui/editor';
 import { renderLoading } from './ui/loading';
 import { renderMenu } from './ui/menu';
 import { renderEnd } from './ui/end';
@@ -114,7 +115,7 @@ async function render(force = false) {
       document.title = 'Play private code | gitcrawl';
       void startAttract();
       showScreen('page');
-      renderPrivate(screen, { home: () => navigate('/'), privacy: () => navigate('/privacy'), play: (ref) => navigate(playPath(ref, { priv: true })) });
+      renderPrivate(screen, { home: () => navigate('/'), privacy: () => navigate('/privacy'), play: (ref) => navigate(playPath(ref, { priv: true })), editor: () => navigate('/editor') });
       break;
     case 'privacy':
       leaveRun();
@@ -122,6 +123,13 @@ async function render(force = false) {
       void startAttract();
       showScreen('page');
       renderPrivacy(screen, { home: () => navigate('/'), back: () => navigate('/private') });
+      break;
+    case 'editor':
+      leaveRun();
+      document.title = 'TODO Raid for VS Code and Cursor | gitcrawl';
+      void startAttract();
+      showScreen('page');
+      renderEditor(screen, { home: () => navigate('/'), guide: () => navigate('/guide') });
       break;
     case 'daily':
       await dailyRaid();
@@ -139,6 +147,7 @@ const landingActions = {
   hall: () => navigate('/hall'),
   guide: () => navigate('/guide'),
   local: () => navigate('/private'),
+  editor: () => navigate('/editor'),
 };
 
 async function fetchSpec(ref: RepoRef, title: string, priv = false): Promise<DungeonSpec | null> {

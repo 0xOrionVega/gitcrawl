@@ -12,6 +12,7 @@ export interface LandingActions {
   hall: () => void;
   guide: () => void;
   local: () => void;
+  editor: () => void;
 }
 
 const FAMOUS = ['facebook/react', 'torvalds/linux', 'vuejs/core', 'kelseyhightower/nocode', 'junegunn/fzf', 'bitcoin/bitcoin'];
@@ -81,6 +82,7 @@ export function renderLanding(root: HTMLElement, actions: LandingActions) {
     h('button', { type: 'button', onclick: actions.versus }, 'Versus: your repo against another'),
     h('button', { type: 'button', onclick: actions.hall }, 'Hall of Shame'),
     h('button', { type: 'button', onclick: actions.local }, 'Private code? Play it safely'),
+    h('button', { type: 'button', onclick: actions.editor }, 'New: TODO Raid for VS Code and Cursor'),
   );
   root.append(
     h(

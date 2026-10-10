@@ -1635,3 +1635,74 @@ img.px {
   background: var(--torch);
   border: 2px solid var(--ink);
 }
+
+/* ---------------------------------------------------------------- TODO Raid (editor extension) */
+.editor-page .victory-sub {
+  max-width: 720px;
+  line-height: 1.35;
+}
+
+.editor-video-wrap {
+  padding: 6px;
+  line-height: 0;
+}
+
+.editor-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 860 / 560;
+  background: #1f1f1f;
+}
+
+.editor-steps {
+  margin: 0;
+  padding: 14px 18px 14px 40px;
+  display: grid;
+  gap: 8px;
+  line-height: 1.35;
+}
+
+.editor-steps code,
+.editor-page kbd {
+  padding: 1px 6px;
+  background: var(--stone-0);
+  border: 2px solid var(--ink);
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.editor-controls {
+  margin: 0 0 12px;
+  padding: 14px 18px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px 18px;
+  line-height: 1.35;
+}
+
+.editor-controls dt {
+  font-family: var(--display);
+  font-size: 10px;
+  line-height: 2;
+  color: var(--torch);
+}
+
+.editor-controls dd {
+  margin: 0;
+}
+
+@media (max-width: 520px) {
+  .editor-controls {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .editor-controls dd {
+    margin-bottom: 8px;
+  }
+}
+
+.editor-monsters {
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+}

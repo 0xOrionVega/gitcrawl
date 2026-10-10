@@ -23,7 +23,7 @@ function safeList() {
   );
 }
 
-export function renderPrivate(root: HTMLElement, actions: { home: () => void; privacy: () => void; play: (ref: RepoRef) => void }) {
+export function renderPrivate(root: HTMLElement, actions: { home: () => void; privacy: () => void; play: (ref: RepoRef) => void; editor: () => void }) {
   clear(root);
   const connect = h('div', { class: 'panel private-option' }, h('h2', {}, 'Connect GitHub'), h('p', { class: 'muted' }, 'Checking…'));
   root.append(
@@ -46,6 +46,13 @@ export function renderPrivate(root: HTMLElement, actions: { home: () => void; pr
           h('p', { class: 'muted' }, 'Or point it at a folder: npx gitcrawl-cli ~/code/my-app. Add --json dungeon.json to save the dungeon instead.'),
         ),
         connect,
+      ),
+      h(
+        'p',
+        { class: 'muted' },
+        'Rather fight in your editor? ',
+        h('button', { class: 'linkish', onclick: actions.editor }, 'TODO Raid for VS Code and Cursor'),
+        ' turns the TODOs in your open file into monsters. Nothing is uploaded.',
       ),
       h('div', { class: 'section' }, h('h2', {}, 'Why it is safe'), safeList(), h('p', {}, h('button', { class: 'linkish', onclick: actions.privacy }, 'Read the full privacy details'))),
     ),
