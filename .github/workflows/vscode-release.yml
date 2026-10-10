@@ -1,0 +1,47 @@
+# Publishes the editor extension (apps/vscode) to the VS Code Marketplace and
+# Open VSX (Cursor, Windsurf, VSCodium) when a tag like vscode-v0.1.0 is pushed.
+# Needs repo secrets: VSCE_PAT (Azure DevOps token, Marketplace > Manage scope)
+# and OVSX_PAT (open-vsx.org access token). A missing secret skips that registry.
+name: VS Code Extension Release
+
+on:
+  push:
+    tags: ['vscode-v*']
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      OVSX_PAT: ${{ secrets.OVSX_PAT }}
+    defaults:
+      run:
+        working-directory: apps/vscode
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+        working-directory: .
+      - run: pnpm test
+        working-directory: .
+      - name: Check the tag matches package.json
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          version=$(node -p "require('./package.json').version")
+          [ "${GITHUB_REF_NAME}" = "vscode-v${version}" ] || { echo "Tag ${GITHUB_REF_NAME} does not match version ${version}"; exit 1; }
+      - run: pnpm package
+      - name: Publish to the VS Code Marketplace
+        if: env.VSCE_PAT != ''
+        run: pnpm exec vsce publish --no-dependencies --packagePath gitcrawl-*.vsix
+      - name: Publish to Open VSX
+        if: env.OVSX_PAT != ''
+        run: pnpm exec ovsx publish gitcrawl-*.vsix
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vsix
+          path: apps/vscode/gitcrawl-*.vsix

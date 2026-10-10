@@ -1,0 +1,84 @@
+{
+  "name": "gitcrawl",
+  "displayName": "gitcrawl: TODO Raid",
+  "description": "Your TODOs come alive as pixel goblins and hunt your cursor. Fix the TODO to banish its monster for good.",
+  "version": "0.1.0",
+  "publisher": "0xorionvega",
+  "license": "MIT",
+  "author": "0xOrionVega (https://github.com/0xOrionVega)",
+  "homepage": "https://github.com/0xOrionVega/gitcrawl/tree/main/apps/vscode#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/0xOrionVega/gitcrawl.git",
+    "directory": "apps/vscode"
+  },
+  "bugs": {
+    "url": "https://github.com/0xOrionVega/gitcrawl/issues"
+  },
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#1a1222",
+    "theme": "dark"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "todo",
+    "fixme",
+    "game",
+    "pixel art",
+    "gitcrawl",
+    "tech debt"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "gitcrawl.startRaid",
+        "title": "Raid This File",
+        "category": "gitcrawl"
+      },
+      {
+        "command": "gitcrawl.endRaid",
+        "title": "End Raid",
+        "category": "gitcrawl",
+        "enablement": "gitcrawl.raiding"
+      }
+    ],
+    "configuration": {
+      "title": "gitcrawl",
+      "properties": {
+        "gitcrawl.speed": {
+          "type": "string",
+          "enum": ["slow", "normal", "fast"],
+          "default": "normal",
+          "description": "How fast the monsters chase your cursor."
+        },
+        "gitcrawl.hearts": {
+          "type": "number",
+          "default": 5,
+          "minimum": 1,
+          "maximum": 9,
+          "description": "Hearts you start a raid with."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsup && tsx scripts/build-assets.ts",
+    "icon": "tsx scripts/build-assets.ts --icon",
+    "package": "pnpm build && vsce package --no-dependencies",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@gitcrawl/shared": "workspace:*",
+    "@types/vscode": "1.85.0",
+    "@vscode/vsce": "4.0.0",
+    "ovsx": "1.2.0",
+    "tsup": "8.5.1"
+  }
+}

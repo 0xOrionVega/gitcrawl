@@ -8,3 +8,4 @@ dist/
 coverage/
 .DS_Store
 apps/web/dist-demo/
+*.vsix

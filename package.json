@@ -1,5 +1,5 @@
 {
-  "name": "gitcrawl",
+  "name": "gitcrawl-monorepo",
   "private": true,
   "type": "module",
   "description": "Paste any GitHub repo, play it as a dungeon.",
