@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { extractTodos } from '@gitcrawl/shared';
-import { alive, createRaid, cursorMoved, shiftLines, STATS, step, syncTodos, tick, todoColumn, WAKE_RANGE, type Board } from '../src/game.js';
+import { alive, createRaid, cursorMoved, shiftLines, STATS, step, swing, syncTodos, tick, todoColumn, WAKE_RANGE, WINDUP, type Board } from '../src/game.js';
 
 const board = (lines: string[]): Board => ({ lineCount: lines.length, lineLength: (l) => lines[l]?.length ?? 0 });
 
@@ -54,7 +54,7 @@ describe('tick', () => {
     expect(raid.monsters[0].pos.line).toBe(7);
   });
 
-  it('bites when it reaches the cursor, then gets knocked back', () => {
+  it('winds up when it reaches the cursor, then bites if you stay', () => {
     const lines = file(20, { 4: '// TODO: bite' });
     const raid = raidOf(lines);
     const b = board(lines);
@@ -62,16 +62,24 @@ describe('tick', () => {
     const cursor = { line: 4, col: 3 };
     m.awake = true;
     m.pos = { line: 4, col: 4 };
-    const events = tick(raid, b, cursor, 1000);
-    expect(events.map((e) => e.type)).toEqual(['hurt']);
+    expect(tick(raid, b, cursor, 1000).map((e) => e.type)).toEqual(['windup']);
+    expect(raid.hearts).toBe(5);
+    expect(tick(raid, b, cursor, 1000 + WINDUP - 1)).toEqual([]);
+    expect(tick(raid, b, cursor, 1000 + WINDUP).map((e) => e.type)).toEqual(['hurt']);
     expect(raid.hearts).toBe(4);
     expect(m.pos.line).not.toBe(4);
-    // Grace period: a second bite right away does nothing.
+  });
+
+  it('misses the bite when the cursor moves away during the wind-up', () => {
+    const lines = file(20, { 4: '// TODO: bite' });
+    const raid = raidOf(lines);
+    const b = board(lines);
+    const m = raid.monsters[0];
+    m.awake = true;
     m.pos = { line: 4, col: 4 };
-    m.stunUntil = 0;
-    m.nextMoveAt = 0;
-    tick(raid, b, cursor, 1100);
-    expect(raid.hearts).toBe(4);
+    tick(raid, b, { line: 4, col: 3 }, 0);
+    expect(tick(raid, b, { line: 6, col: 3 }, WINDUP)).toEqual([]);
+    expect(raid.hearts).toBe(5);
   });
 
   it('ends the raid when the hearts run out', () => {
@@ -80,9 +88,42 @@ describe('tick', () => {
     const m = raid.monsters[0];
     m.awake = true;
     m.pos = { line: 4, col: 0 };
-    const events = tick(raid, board(lines), { line: 4, col: 1 }, 0);
+    const cursor = { line: 4, col: 1 };
+    tick(raid, board(lines), cursor, 0);
+    const events = tick(raid, board(lines), cursor, WINDUP);
     expect(events.map((e) => e.type)).toEqual(['hurt', 'lost']);
     expect(raid.over).toBe('lost');
+  });
+});
+
+describe('swing', () => {
+  it('hits everything within a line and a few columns, and nothing further', () => {
+    const lines = file(20, { 5: '// TODO: above', 6: '// FIXME: same line', 9: '// TODO: far' });
+    const raid = raidOf(lines);
+    const [above, same, far] = raid.monsters;
+    const events = swing(raid, board(lines), { line: 6, col: 8 }, 0);
+    expect(events.map((e) => e.type)).toEqual(['swing', 'hit', 'hit']);
+    expect([above.hp, same.hp, far.hp]).toEqual([1, 2, 2]);
+  });
+
+  it('cancels a wind-up and needs a moment between swings', () => {
+    const lines = file(20, { 6: '// FIXME: winding' });
+    const raid = raidOf(lines);
+    const b = board(lines);
+    const m = raid.monsters[0];
+    m.awake = true;
+    tick(raid, b, { line: 6, col: 4 }, 0);
+    expect(m.windupUntil).toBeGreaterThan(0);
+    swing(raid, b, { line: 6, col: 4 }, 10);
+    expect(m.windupUntil).toBe(0);
+    m.stunUntil = 0;
+    expect(swing(raid, b, { line: 6, col: 4 }, 100)).toEqual([]);
+  });
+
+  it('can miss', () => {
+    const lines = file(20, { 2: '// TODO: over here' });
+    const raid = raidOf(lines);
+    expect(swing(raid, board(lines), { line: 12, col: 0 }, 0)).toEqual([{ type: 'swing', hits: 0 }]);
   });
 });
 

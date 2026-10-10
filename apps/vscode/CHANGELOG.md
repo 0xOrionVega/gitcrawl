@@ -3,5 +3,6 @@
 ## 0.1.0
 
 - Raid This File: TODO goblins, FIXME skeletons, HACK slimes and BUG ghosts hunt your cursor.
-- Hit monsters by moving your cursor onto them; fix the comment to banish them for good.
+- Swing with ⌥Space (Ctrl+Alt+Space) or bump monsters with the text cursor; fix the comment to banish them for good.
+- Monsters glow red before they bite, so you can dodge.
 - Hearts and score in the status bar, the TODO text on hover.

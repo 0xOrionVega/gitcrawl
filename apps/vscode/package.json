@@ -43,6 +43,12 @@
         "category": "gitcrawl"
       },
       {
+        "command": "gitcrawl.swing",
+        "title": "Swing",
+        "category": "gitcrawl",
+        "enablement": "gitcrawl.raiding"
+      },
+      {
         "command": "gitcrawl.endRaid",
         "title": "End Raid",
         "category": "gitcrawl",
@@ -54,7 +60,11 @@
       "properties": {
         "gitcrawl.speed": {
           "type": "string",
-          "enum": ["slow", "normal", "fast"],
+          "enum": [
+            "slow",
+            "normal",
+            "fast"
+          ],
           "default": "normal",
           "description": "How fast the monsters chase your cursor."
         },
@@ -66,6 +76,22 @@
           "description": "Hearts you start a raid with."
         }
       }
+    },
+    "keybindings": [
+      {
+        "command": "gitcrawl.swing",
+        "key": "ctrl+alt+space",
+        "mac": "alt+space",
+        "when": "gitcrawl.raiding && editorTextFocus"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "gitcrawl.swing",
+          "when": "false"
+        }
+      ]
     }
   },
   "scripts": {

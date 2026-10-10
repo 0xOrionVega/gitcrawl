@@ -13,6 +13,9 @@ import {
   MONSTER_NAME,
   REACH,
   shiftLines,
+  swing,
+  SWING_COLS,
+  SWING_LINES,
   syncTodos,
   tick,
   type Board,
@@ -28,6 +31,8 @@ const FRAME_MS = 320;
 const SPEECH_MS = 3200;
 const CORPSE_MS = 2500;
 const HURT_FLASH_MS = 450;
+const SWING_FLASH_MS = 160;
+const WINDUP_BLINK_MS = 110;
 const RESYNC_MS = 300;
 const SPEEDS: Record<string, number> = { slow: 0.6, normal: 1, fast: 1.6 };
 const KINDS: MonsterKind[] = ['goblin', 'skeleton', 'slime', 'ghost'];
@@ -54,6 +59,7 @@ export function activate(context: vscode.ExtensionContext) {
       current = new RaidSession(context, editor);
     }),
     vscode.commands.registerCommand('gitcrawl.endRaid', () => current?.end(null)),
+    vscode.commands.registerCommand('gitcrawl.swing', () => current?.swing()),
     { dispose: () => current?.end(null) },
   );
 }
@@ -71,10 +77,13 @@ class RaidSession {
   private readonly corpseType: vscode.TextEditorDecorationType;
   private readonly speechType: vscode.TextEditorDecorationType;
   private readonly hurtType: vscode.TextEditorDecorationType;
+  private readonly swingType: vscode.TextEditorDecorationType;
   private readonly status: vscode.StatusBarItem;
   private readonly speech = new Map<number, number>();
   private corpses: { pos: Pos; until: number }[] = [];
   private hurtUntil = 0;
+  private swingUntil = 0;
+  private swingAt: Pos | null = null;
   private timer: NodeJS.Timeout;
   private resync: NodeJS.Timeout | null = null;
   private ended = false;
@@ -92,6 +101,10 @@ class RaidSession {
       for (const frame of [0, 1]) {
         this.sprites.set(`${kind}-${frame}`, this.spriteType(`${kind}-${frame}`, ''));
         this.sprites.set(`${kind}-${frame}-stun`, this.spriteType(`${kind}-${frame}`, 'opacity: 0.4;'));
+        this.sprites.set(
+          `${kind}-${frame}-windup`,
+          this.spriteType(`${kind}-${frame}`, 'filter: drop-shadow(0 0 2px #ff4d5e) drop-shadow(0 0 3px #ff4d5e) brightness(1.3);'),
+        );
       }
     }
     this.corpseType = this.spriteType('bones', 'opacity: 0.8;');
@@ -109,9 +122,14 @@ class RaidSession {
       backgroundColor: 'rgba(255, 77, 94, 0.28)',
     });
 
+    this.swingType = vscode.window.createTextEditorDecorationType({
+      backgroundColor: 'rgba(255, 226, 74, 0.22)',
+      borderRadius: '3px',
+    });
+
     this.status = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1000);
     this.status.command = 'gitcrawl.endRaid';
-    this.status.tooltip = 'gitcrawl raid: click to end it';
+    this.status.tooltip = `gitcrawl raid: ${process.platform === 'darwin' ? '⌥Space' : 'Ctrl+Alt+Space'} to swing, click here to end it`;
     this.status.show();
 
     this.disposables.push(
@@ -129,7 +147,8 @@ class RaidSession {
     void vscode.commands.executeCommand('setContext', 'gitcrawl.raiding', true);
     this.timer = setInterval(() => this.loop(), TICK_MS);
     this.render();
-    vscode.window.setStatusBarMessage(`gitcrawl: ${this.raid.monsters.length} monsters in this file. Move your cursor onto them to fight.`, 5000);
+    const key = process.platform === 'darwin' ? '⌥Space' : 'Ctrl+Alt+Space';
+    vscode.window.setStatusBarMessage(`gitcrawl: ${this.raid.monsters.length} monsters in this file. Press ${key} to swing at them.`, 6000);
   }
 
   private spriteType(name: string, extraCss: string) {
@@ -164,6 +183,18 @@ class RaidSession {
     // Paused while you're in another file or another window: no ambushes.
     if (!editor || editor.document !== this.doc || !vscode.window.state.focused) return;
     this.handle(tick(this.raid, this.board(), this.cursor(editor), Date.now(), this.speed));
+    this.render();
+  }
+
+  swing() {
+    const editor = this.editor();
+    if (this.ended || !editor || editor !== vscode.window.activeTextEditor) return;
+    const cursor = this.cursor(editor);
+    const events = swing(this.raid, this.board(), cursor, Date.now());
+    if (events.length === 0) return;
+    this.swingAt = cursor;
+    this.swingUntil = Date.now() + SWING_FLASH_MS;
+    this.handle(events);
     this.render();
   }
 
@@ -209,6 +240,8 @@ class RaidSession {
           return;
         case 'hit':
         case 'spawned':
+        case 'windup':
+        case 'swing':
           break;
       }
     }
@@ -229,7 +262,9 @@ class RaidSession {
     for (const key of this.sprites.keys()) groups.set(key, []);
     const speech: vscode.DecorationOptions[] = [];
     for (const m of alive(this.raid)) {
-      groups.get(`${m.kind}-${frame}${now < m.stunUntil ? '-stun' : ''}`)!.push(at(m.pos));
+      // A winding-up monster blinks red: you have a moment to dodge or swing.
+      const winding = m.windupUntil > now && Math.floor(now / WINDUP_BLINK_MS) % 2 === 0;
+      groups.get(`${m.kind}-${frame}${now < m.stunUntil ? '-stun' : winding ? '-windup' : ''}`)!.push(at(m.pos));
       const until = this.speech.get(m.id);
       if (until && now < until) {
         const end = this.doc.lineAt(Math.min(m.pos.line, this.doc.lineCount - 1)).range.end;
@@ -241,6 +276,17 @@ class RaidSession {
 
     this.corpses = this.corpses.filter((c) => now < c.until);
     editor.setDecorations(this.corpseType, this.corpses.map((c) => at(c.pos)));
+    const swingRanges: vscode.Range[] = [];
+    if (this.swingAt && now < this.swingUntil) {
+      const { line, col } = this.swingAt;
+      for (let l = Math.max(0, line - SWING_LINES); l <= Math.min(this.doc.lineCount - 1, line + SWING_LINES); l++) {
+        const len = this.doc.lineAt(l).text.length;
+        const from = Math.min(len, Math.max(0, col - SWING_COLS));
+        const to = Math.min(len, col + SWING_COLS + 1);
+        if (to > from) swingRanges.push(new vscode.Range(l, from, l, to));
+      }
+    }
+    editor.setDecorations(this.swingType, swingRanges);
     editor.setDecorations(this.hurtType, now < this.hurtUntil ? [editor.selection.active].map((p) => new vscode.Range(p, p)) : []);
 
     const left = alive(this.raid).length;
@@ -254,7 +300,7 @@ class RaidSession {
     const md = new vscode.MarkdownString();
     md.appendMarkdown(`**${MONSTER_NAME[m.kind]}** · ${'♥'.repeat(m.hp)}${'♡'.repeat(m.maxHp - m.hp)}\n\n`);
     md.appendMarkdown(`> ${m.todo.text ? escape(m.todo.text) : `*an empty ${m.todo.kind}*`}\n\n`);
-    md.appendMarkdown(`Lives on line ${m.home + 1}. Hit it with your cursor, or fix the ${m.todo.kind} to banish it for good.`);
+    md.appendMarkdown(`Lives on line ${m.home + 1}. Swing at it, or fix the ${m.todo.kind} to banish it for good.`);
     return new vscode.Hover(md);
   }
 
@@ -267,6 +313,7 @@ class RaidSession {
     this.corpseType.dispose();
     this.speechType.dispose();
     this.hurtType.dispose();
+    this.swingType.dispose();
     this.status.dispose();
     for (const d of this.disposables) d.dispose();
     void vscode.commands.executeCommand('setContext', 'gitcrawl.raiding', false);

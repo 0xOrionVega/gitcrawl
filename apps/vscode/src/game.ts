@@ -1,8 +1,9 @@
 /**
  * TODO raid rules: every TODO-style comment in a file becomes a monster that
  * wakes when the cursor comes near and walks toward it. Moving the cursor onto
- * a monster hits it; a monster reaching the cursor costs a heart. Deleting the
- * TODO banishes its monster for good.
+ * a monster or swinging near it hits it; a monster that reaches the cursor
+ * winds up for a moment, then bites for a heart if you're still there.
+ * Deleting the TODO banishes its monster for good.
  *
  * Pure: no editor APIs, all times passed in, so it runs under vitest.
  */
@@ -28,6 +29,8 @@ export interface Monster {
   awake: boolean;
   /** No moving or biting until this time (after being hit or biting). */
   stunUntil: number;
+  /** Winding up a bite that lands at this time; 0 when not. */
+  windupUntil: number;
   nextMoveAt: number;
   dead: boolean;
 }
@@ -38,7 +41,9 @@ export type RaidEvent =
   | { type: 'slain'; monster: Monster }
   | { type: 'banished'; monster: Monster }
   | { type: 'spawned'; monster: Monster }
+  | { type: 'windup'; monster: Monster }
   | { type: 'hurt'; monster: Monster; hearts: number }
+  | { type: 'swing'; hits: number }
   | { type: 'won' }
   | { type: 'lost' };
 
@@ -51,6 +56,7 @@ export interface Raid {
   invulnerableUntil: number;
   over: 'won' | 'lost' | null;
   nextId: number;
+  nextSwingAt: number;
 }
 
 /** What the rules need to know about the document. */
@@ -91,6 +97,12 @@ export const MONSTER_NAME: Record<MonsterKind, string> = {
 export const WAKE_RANGE = 12;
 /** Columns either side of the cursor that count as touching. */
 export const REACH = 2;
+/** How far a swing reaches: lines above and below, and columns either side. */
+export const SWING_LINES = 1;
+export const SWING_COLS = 6;
+/** Warning time before a bite lands (at normal speed). */
+export const WINDUP = 650;
+const SWING_COOLDOWN = 350;
 const HURT_GRACE = 1200;
 const HIT_STUN = 900;
 const BITE_STUN = 1500;
@@ -104,7 +116,7 @@ export function todoColumn(lineText: string, kind: TodoKind): number {
 }
 
 export function createRaid(todos: TodoItem[], lines: string[], hearts = 5): Raid {
-  const raid: Raid = { monsters: [], hearts, maxHearts: hearts, slain: 0, banished: 0, invulnerableUntil: 0, over: null, nextId: 1 };
+  const raid: Raid = { monsters: [], hearts, maxHearts: hearts, slain: 0, banished: 0, invulnerableUntil: 0, over: null, nextId: 1, nextSwingAt: 0 };
   for (const todo of todos) raid.monsters.push(spawn(raid, todo, lines[todo.line - 1] ?? ''));
   return raid;
 }
@@ -123,6 +135,7 @@ function spawn(raid: Raid, todo: TodoItem, lineText: string): Monster {
     maxHp: hp,
     awake: false,
     stunUntil: 0,
+    windupUntil: 0,
     nextMoveAt: 0,
     dead: false,
   };
@@ -161,25 +174,45 @@ function finish(raid: Raid, events: RaidEvent[]) {
   }
 }
 
+function hit(raid: Raid, board: Board, m: Monster, from: Pos, now: number, events: RaidEvent[]) {
+  m.awake = true;
+  m.windupUntil = 0;
+  m.hp -= 1;
+  if (m.hp <= 0) {
+    m.dead = true;
+    raid.slain += 1;
+    events.push({ type: 'slain', monster: m });
+    return;
+  }
+  m.stunUntil = now + HIT_STUN;
+  m.nextMoveAt = m.stunUntil;
+  knockBack(board, m, from, HIT_KNOCKBACK);
+  events.push({ type: 'hit', monster: m });
+}
+
 /** The cursor moved: anything it lands next to takes a hit. */
 export function cursorMoved(raid: Raid, board: Board, cursor: Pos, now: number): RaidEvent[] {
   const events: RaidEvent[] = [];
   if (raid.over) return events;
   for (const m of alive(raid)) {
-    if (!touching(m.pos, cursor) || now < m.stunUntil) continue;
-    m.awake = true;
-    m.hp -= 1;
-    if (m.hp <= 0) {
-      m.dead = true;
-      raid.slain += 1;
-      events.push({ type: 'slain', monster: m });
-    } else {
-      m.stunUntil = now + HIT_STUN;
-      m.nextMoveAt = m.stunUntil;
-      knockBack(board, m, cursor, HIT_KNOCKBACK);
-      events.push({ type: 'hit', monster: m });
-    }
+    if (touching(m.pos, cursor) && now >= m.stunUntil) hit(raid, board, m, cursor, now, events);
   }
+  finish(raid, events);
+  return events;
+}
+
+export function inSwing(m: Pos, cursor: Pos): boolean {
+  return Math.abs(m.line - cursor.line) <= SWING_LINES && Math.abs(m.col - cursor.col) <= SWING_COLS;
+}
+
+/** Swing at everything around the cursor. Does nothing while the last swing recovers. */
+export function swing(raid: Raid, board: Board, cursor: Pos, now: number): RaidEvent[] {
+  const events: RaidEvent[] = [];
+  if (raid.over || now < raid.nextSwingAt) return events;
+  raid.nextSwingAt = now + SWING_COOLDOWN;
+  const targets = alive(raid).filter((m) => inSwing(m.pos, cursor) && now >= m.stunUntil);
+  events.push({ type: 'swing', hits: targets.length });
+  for (const m of targets) hit(raid, board, m, cursor, now, events);
   finish(raid, events);
   return events;
 }
@@ -197,10 +230,14 @@ export function tick(raid: Raid, board: Board, cursor: Pos, now: number, speed =
       events.push({ type: 'spotted', monster: m });
       continue;
     }
-    if (now < m.stunUntil || now < m.nextMoveAt) continue;
-    m.nextMoveAt = now + STATS[m.kind].step / speed;
+    if (now < m.stunUntil) continue;
 
-    if (touching(m.pos, cursor)) {
+    if (m.windupUntil) {
+      if (now < m.windupUntil) continue;
+      m.windupUntil = 0;
+      m.nextMoveAt = now + STATS[m.kind].step / speed;
+      // Dodged: the bite lands only if the cursor is still in reach.
+      if (!touching(m.pos, cursor)) continue;
       if (now >= raid.invulnerableUntil) {
         raid.hearts -= 1;
         raid.invulnerableUntil = now + HURT_GRACE;
@@ -208,6 +245,15 @@ export function tick(raid: Raid, board: Board, cursor: Pos, now: number, speed =
       }
       m.stunUntil = now + BITE_STUN;
       knockBack(board, m, cursor, BITE_KNOCKBACK);
+      continue;
+    }
+
+    if (now < m.nextMoveAt) continue;
+    m.nextMoveAt = now + STATS[m.kind].step / speed;
+
+    if (touching(m.pos, cursor)) {
+      m.windupUntil = now + WINDUP / speed;
+      events.push({ type: 'windup', monster: m });
       continue;
     }
 
